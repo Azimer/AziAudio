@@ -1,2 +1,2 @@
 # AziAudio
-Azimer's Audio Plugin
+## Azimer's Audio Plugin for N64 emulators
