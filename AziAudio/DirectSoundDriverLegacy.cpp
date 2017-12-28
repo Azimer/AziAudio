@@ -10,6 +10,7 @@
 ****************************************************************************/
 
 #include "common.h"
+#if defined(ENABLE_BACKEND_DIRECTSOUND8_LEGACY)
 #include <stdio.h>
 #include "DirectSoundDriverLegacy.h"
 #include "AudioSpec.h"
@@ -146,7 +147,7 @@ DWORD WINAPI AudioThreadProc(DirectSoundDriverLegacy *ac) {
 				ExitThread(~0u);
 			// Check to see if the audio pointer moved on to the next segment
 			if (write_pos == last_pos) {
-				if (Configuration::getDisallowSleepDS8() == false)
+				if ((Configuration::getDisallowSleepDS8() == false) || (write_pos == 0))
 					Sleep(1);
 			}
 			WaitForSingleObject(ac->hMutex, INFINITE);
@@ -750,3 +751,4 @@ void DirectSoundDriverLegacy::SetVolume(u32 volume) {
 	if (volume == 0) dsVolume = DSBVOLUME_MAX;
 	if (lpdsb != NULL) lpdsb->SetVolume(dsVolume);
 }
+#endif

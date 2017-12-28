@@ -14,6 +14,17 @@
 // Configure the plugin to have a console window for informational output -- should be used for debugging only
 //#define USE_PRINTF
 
+#ifdef _WIN32
+#define ENABLE_BACKEND_DIRECTSOUND8_LEGACY
+#define ENABLE_BACKEND_XAUDIO2_LEGACY
+#define ENABLE_BACKEND_DIRECTSOUND8
+#define ENABLE_BACKEND_XAUDIO2
+#define ENABLE_BACKEND_COMMON
+#define ENABLE_BACKEND_WASAPI
+#define ENABLE_BACKEND_WAVEOUT
+#endif
+//#define ENABLE_BACKEND_PORTAUDIO // NYI
+
 #ifndef _COMMON_DOT_H_
 #define _COMMON_DOT_H_
 
@@ -54,10 +65,15 @@
 enum SoundDriverType
 {
 	SND_DRIVER_NOSOUND = 0x0000,
+// Windows-only
 	SND_DRIVER_DS8L = 0x1000,
 	SND_DRIVER_DS8 = 0x1001,
 	SND_DRIVER_XA2L = 0x1002,
 	SND_DRIVER_XA2 = 0x1003,
+	SND_DRIVER_WASAPI = 0x1004,
+	SND_DRIVER_WAVEOUT = 0x1005,
+// Cross Platform
+	SND_DRIVER_PORTAUDIO = 0x1100  // NYI
 };
 
 
@@ -98,14 +114,14 @@ unsigned long GenerateCRC (unsigned char *data, int size);
 #endif
 #else
 #ifdef _DEBUG
-#define PLUGIN_DEBUG " (Debug r23)"
+#define PLUGIN_DEBUG " (Debug r37)"
 #else
 #define PLUGIN_DEBUG ""
 #endif
 #endif
 
 #define PLUGIN_RELEASE " v0.70"
-#define PLUGIN_BUILD ".08b" \
+#define PLUGIN_BUILD " WIP 10" \
 	   PLUGIN_DEBUG 
 
 #define PLUGIN_VERSION \

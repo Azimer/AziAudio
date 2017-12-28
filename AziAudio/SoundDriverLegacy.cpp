@@ -9,8 +9,9 @@
 *                                                                           *
 ****************************************************************************/
 
+#include "common.h"
+#if defined(ENABLE_BACKEND_DIRECTSOUND8_LEGACY) || defined(ENABLE_BACKEND_XAUDIO2_LEGACY)
 #include "SoundDriverLegacy.h"
-
 // Load the buffer from the AI interface to our emulated buffer
 void SoundDriverLegacy::AI_LenChanged(u8 *start, u32 length)
 {
@@ -68,3 +69,4 @@ void SoundDriverLegacy::AI_Update(Boolean Wait)
 {
 	AiUpdate(Wait);
 }
+#endif

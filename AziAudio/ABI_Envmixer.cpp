@@ -27,10 +27,10 @@ s16 Env_Wet;		// 0x001E(T8)
 
 static inline s32 mixer_macc(s32* Acc, s32* AdderStart, s32* AdderEnd, s32 Ramp)
 {
-	s64 product, product_shifted;
 	s32 volume;
 
-#if 1
+#if 0
+	s64 product, product_shifted;
 	/*** TODO!  It looks like my C translation of Azimer's assembly code ... ***/
 	product = (s64)(*AdderEnd) * (s64)Ramp;
 	product_shifted = product >> 16;
@@ -43,8 +43,8 @@ static inline s32 mixer_macc(s32* Acc, s32* AdderStart, s32* AdderEnd, s32 Ramp)
 	/*** ... comes out to something not the same as the C code he commented. ***/
 	volume = (*AdderEnd - *AdderStart) >> 3;
 	*Acc = *AdderStart;
-	*AdderEnd   = ((s64)(*AdderEnd) * (s64)Ramp) >> 16;
-	*AdderStart = ((s64)(*Acc)      * (s64)Ramp) >> 16;
+	*AdderEnd   = (s32)((((s64)(*AdderEnd) * (s64)Ramp) >> 16) & 0xFFFFFFFF);
+	*AdderStart = (s32)((((s64)(*Acc)      * (s64)Ramp) >> 16) & 0xFFFFFFFF);
 #endif
 	return (volume);
 }
@@ -311,7 +311,7 @@ void ENVMIXER_GE() {
 	s32 AuxR;
 	s32 AuxL;
 	s32 i1;
-	u16 AuxIncRate = 1;
+	//u16 AuxIncRate = 1;
 	s16 zero[8];
 	memset(zero, 0, sizeof(s16)* 8);
 	s32 LAdder, LAcc, LVol;
@@ -352,7 +352,7 @@ void ENVMIXER_GE() {
 
 	
 	if(!(flags&A_AUX)) {
-		AuxIncRate=0;
+		//AuxIncRate=0;
 		aux2=aux3=zero;
 	}
 
@@ -378,20 +378,20 @@ void ENVMIXER_GE() {
 			RVol = RTrg;
 		}
 		// ****************************************************************
-		MainL = MultQ15(Dry, (s16)(LVol&0xFFFF));
+		MainL = MultQ15(Dry, (s16)(LVol & 0xFFFF));
 		MainR = MultQ15(Dry, (s16)(RVol & 0xFFFF));
 		i1 = inp[MES(y)];
 
-		out[MES(y)] = pack_signed(out[MES(y)] + MultQ15((s16)i1, (s16)MainL));
-		aux1[MES(y)] = pack_signed(aux1[MES(y)] + MultQ15((s16)i1, (s16)MainR));
+		out[MES(y)] = pack_signed(out[MES(y)] + MultQ15((s16)i1, (s16)MainR));
+		aux1[MES(y)] = pack_signed(aux1[MES(y)] + MultQ15((s16)i1, (s16)MainL));
 
 		// ****************************************************************
-		if (!(flags&A_AUX)) {
+		if ((flags&A_AUX)) {
 			AuxL = MultQ15(Wet, (s16)(LVol & 0xFFFF));
 			AuxR = MultQ15(Wet, (s16)(RVol & 0xFFFF));
 
-			aux2[MES(y)] = pack_signed(aux2[MES(y)] + MultQ15((s16)i1, (s16)AuxL));
-			aux3[MES(y)] = pack_signed(aux3[MES(y)] + MultQ15((s16)i1, (s16)AuxR));
+			aux2[MES(y)] = pack_signed(aux2[MES(y)] + MultQ15((s16)i1, (s16)AuxR));
+			aux3[MES(y)] = pack_signed(aux3[MES(y)] + MultQ15((s16)i1, (s16)AuxL));
 		}
 	}
 	//}

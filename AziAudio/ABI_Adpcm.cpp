@@ -299,7 +299,7 @@ void ADPCM2() { // Verified to be 100% Accurate...
 	s16* book2;
 
 	u8 srange;
-	u8 inpinc;
+	//u8 inpinc;
 	u8 mask1;
 	u8 mask2;
 	u8 shifter;
@@ -312,16 +312,16 @@ void ADPCM2() { // Verified to be 100% Accurate...
 		else
 			memcpy(out, &DRAM[Address], 32);
 	}
-	if (Flags & 0x4) { // Tricky lil Zelda MM and ABI2!!! hahaha I know your secrets! :DDD
+	if (Flags & 0x4) { // Needed for Zelda MM
 		srange = 0xE;
-		inpinc = 0x5;
+		//inpinc = 0x5;
 		mask1 = 0xC0;
 		mask2 = 0x30;
 		shifter = 10;
 	}
 	else {
 		srange = 0xC;
-		inpinc = 0x9;
+		//inpinc = 0x9;
 		mask1 = 0xF0;
 		mask2 = 0x0F;
 		shifter = 12;

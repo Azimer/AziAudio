@@ -85,6 +85,7 @@ void Configuration::LoadSettings()
 	if (file == NULL)
 	{
 		SaveSettings(); // Saves the config file with defaults
+		return;
 	}
 	else
 	{
@@ -112,6 +113,10 @@ void Configuration::LoadSettings()
 		if (azicfg[8] > 0) 	configBackendFPS = azicfg[8];
 		configDisallowSleepXA2 = (azicfg[9] != 0x00) ? true : false;
 		configDisallowSleepDS8 = (azicfg[10] != 0x00) ? true : false;
+	}
+	if (SoundDriverFactory::DriverExists(configDriver) == false)
+	{
+		configDriver = SoundDriverFactory::DefaultDriver();
 	}
 }
 void Configuration::SaveSettings()
@@ -155,7 +160,7 @@ void Configuration::LoadDefaults()
 	configFrequency = 44100; // Not implemented -- needs testing
 	configBitRate   = 16;    // Not implemented -- needs testing
 	configBufferLevel = 3;  // NewAudio only - How many frames to buffer
-	configBufferFPS = 60;   // NewAudio only - How much data to frame per second
+	configBufferFPS = 45;   // NewAudio only - How much data to frame per second
 	configBackendFPS = 90;  // NewAudio only - How much data to frame per second
 	configDisallowSleepXA2 = false;
 	configDisallowSleepDS8 = false;
@@ -398,9 +403,9 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 		char textPos[20];
 		sprintf(textPos, "%i", configBufferLevel);
 		SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
-		sprintf(textPos, "%i", configBackendFPS);
+		sprintf(textPos, "%i ms", 1000/configBackendFPS);
 		SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
-		sprintf(textPos, "%i", configBufferFPS);
+		sprintf(textPos, "%i ms", 1000/configBufferFPS);
 		SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 
 		break;
@@ -430,12 +435,12 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 					break;
 				case IDC_SLIDER_BACKFPS:
 					dwPosition = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i", dwPosition*15);
+					sprintf(textPos, "%i ms", (DWORD)(1000/(dwPosition*15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BUFFERFPS:
 					dwPosition = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i", dwPosition*15);
+					sprintf(textPos, "%i ms", (DWORD)(1000 / (dwPosition * 15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 					break;
 			}

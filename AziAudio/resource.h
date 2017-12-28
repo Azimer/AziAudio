@@ -27,6 +27,8 @@
 #define IDC_DEVICE2                     1015
 #define IDC_BACKEND                     1015
 #define IDC_COMBO2                      1016
+#define IDC_DEVICE3                     1016
+#define IDC_PROFILE                     1016
 #define IDC_SLIDER_BUFFERFPS            1017
 #define IDC_SLIDER_BACKFPS              1018
 #define IDC_SLIDER_BUFFERFPS2           1019

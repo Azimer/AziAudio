@@ -10,6 +10,7 @@
 ****************************************************************************/
 
 #include "common.h"
+#if defined(ENABLE_BACKEND_XAUDIO2_LEGACY)
 #include "XAudio2SoundDriverLegacy.h"
 #include "AudioSpec.h"
 #include <stdio.h>
@@ -327,3 +328,4 @@ void __stdcall VoiceCallbackLegacy::OnVoiceProcessingPassStart(UINT32 SamplesReq
 	//if (SamplesRequired > 0)
 	//	DEBUG_OUTPUT("SR: %i FB: %i BB: %i  CS:%i\n", SamplesRequired, filledBuffers, bufferBytes, cacheSize);
 }
+#endif
