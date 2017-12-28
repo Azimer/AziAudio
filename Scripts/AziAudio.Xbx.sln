@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AziAudio.Xbx", "..\AziAudio\AziAudio.xbx.vcproj", "{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Profile = Profile
+		Profile_FastCap = Profile_FastCap
+		Release = Release
+		Release_LTCG = Release_LTCG
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Debug.ActiveCfg = Debug|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Debug.Build.0 = Debug|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Profile.ActiveCfg = Profile|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Profile.Build.0 = Profile|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Profile_FastCap.ActiveCfg = Profile_FastCap|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Profile_FastCap.Build.0 = Profile_FastCap|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Release.ActiveCfg = Release|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Release.Build.0 = Release|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Release_LTCG.ActiveCfg = Release_LTCG|Xbox
+		{B0A432FE-0718-47CA-8621-FF9D16FCE3E7}.Release_LTCG.Build.0 = Release_LTCG|Xbox
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
