@@ -53,7 +53,7 @@ s32 MultAddLUT(s16 *src, u32 srcPtr, u32 location)
 	for (int i = 0; i < 4; i++)
 	{
 		s32 temp = ((s32)*(s16*)(src + MES(srcPtr + i)) * ((s32)((s16)lut[i])));
-		accum += (s32)(temp >> 15);
+		accum += (s32)((temp+0x4000) >> 15);
 	}
 
 	return accum;
