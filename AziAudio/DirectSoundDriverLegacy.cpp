@@ -17,7 +17,9 @@
 //#include "WaveOut.h"
 #include "SoundDriverFactory.h"
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8L, DirectSoundDriverLegacy::CreateSoundDriver, "DirectSound 8 Legacy Driver", 5);
+bool DirectSoundDriverLegacy::ClassRegistered = DirectSoundDriverLegacy::ValidateDriver() ?
+			SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8L, DirectSoundDriverLegacy::CreateSoundDriver, "DirectSound 8 Legacy Driver", 5) :
+			false;
 
 // TODO: Clean this up a bit...
 
@@ -41,6 +43,11 @@ static DWORD interruptcnt = 0;
 
 //WaveOut test;
 #define STREAM_DMA
+
+bool DirectSoundDriverLegacy::ValidateDriver()
+{
+	return true;
+}
 
 // Fills up a buffer and remixes the audio (Streaming version)
 #ifdef STREAM_DMA // Streaming Version

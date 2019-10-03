@@ -17,7 +17,9 @@
 //#include "WaveOut.h"
 #include "SoundDriverFactory.h"
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8, DirectSoundDriver::CreateSoundDriver, "DirectSound 8 Driver", 6);
+bool DirectSoundDriver::ClassRegistered = DirectSoundDriver::ValidateDriver() ?
+			SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_DS8, DirectSoundDriver::CreateSoundDriver, "DirectSound 8 Driver", 6) :
+			false;
 
 // TODO: Clean this up a bit...
 static DWORD sLOCK_SIZE;
@@ -40,6 +42,10 @@ static DWORD interruptcnt = 0;
 
 //WaveOut test;
 
+bool DirectSoundDriver::ValidateDriver()
+{
+	return true;
+}
 
 DWORD WINAPI AudioThreadProc(DirectSoundDriver *ac) {
 	DWORD dwStatus;

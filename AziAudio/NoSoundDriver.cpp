@@ -17,7 +17,15 @@
 #include <unistd.h>
 #endif
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0);
+bool NoSoundDriver::ClassRegistered = NoSoundDriver::ValidateDriver() ?
+		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0) :
+		false;
+
+bool NoSoundDriver::ValidateDriver()
+{
+	// No Sound should always be an option.  The only issue is if GetTickCount isn't supported or something similar
+	return true;
+}
 
 Boolean NoSoundDriver::Initialize()
 {

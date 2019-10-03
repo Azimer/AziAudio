@@ -43,6 +43,7 @@ public:
 	void SetVolume(u32 volume);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new WaveOutSoundDriver(); }
+	static bool ValidateDriver();
 
 protected:
 
@@ -57,6 +58,7 @@ protected:
 	u32 SampleRate;
 
 private:
+	static bool ClassRegistered;
 };
 
 #if !defined(_MSC_VER)

@@ -50,7 +50,7 @@ public:
 	void SetFrequency(u32 Frequency);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new NoSoundDriver(); }
-
+	static bool ValidateDriver();
 
 protected:
 	bool dllInitialized;
@@ -62,4 +62,7 @@ protected:
 	*/
 	bool isPlaying;
 	u32 lastTick;
+
+private:
+	static bool ClassRegistered;
 };

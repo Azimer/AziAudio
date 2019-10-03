@@ -76,6 +76,7 @@ public:
 	void SetVolume(u32 volume);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriver(); }
+	static bool ValidateDriver();
 
 protected:
 
@@ -85,6 +86,7 @@ protected:
 private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
+	static bool ClassRegistered;
 };
 
 /*

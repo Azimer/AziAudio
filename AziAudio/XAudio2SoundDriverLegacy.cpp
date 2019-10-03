@@ -16,7 +16,9 @@
 #include <stdio.h>
 #include "SoundDriverFactory.h"
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2L, XAudio2SoundDriverLegacy::CreateSoundDriver, "XAudio2 Legacy Driver", 11);
+bool XAudio2SoundDriverLegacy::ClassRegistered = XAudio2SoundDriverLegacy::ValidateDriver() ?
+		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2L, XAudio2SoundDriverLegacy::CreateSoundDriver, "XAudio2 Legacy Driver", 11) :
+		false;
 
 static IXAudio2* g_engine;
 static IXAudio2SourceVoice* g_source;
@@ -37,6 +39,12 @@ static int lastLength = 1;
 static int cacheSize = 0;
 static int interrupts = 0;
 static VoiceCallbackLegacy voiceCallback;
+
+bool XAudio2SoundDriverLegacy::ValidateDriver()
+{
+	return true;
+}
+
 XAudio2SoundDriverLegacy::XAudio2SoundDriverLegacy()
 {
 	g_engine = NULL;

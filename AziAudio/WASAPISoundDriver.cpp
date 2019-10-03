@@ -18,8 +18,9 @@
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WASAPI, WASAPISoundDriver::CreateSoundDriver, "WASAPI Driver (experimental)", 0);
-
+bool WASAPISoundDriver::ClassRegistered = WASAPISoundDriver::ValidateDriver() ?
+					SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WASAPI, WASAPISoundDriver::CreateSoundDriver, "WASAPI Driver (experimental)", 0) :
+					false;
 // REFERENCE_TIME time units per second and per millisecond
 #define REFTIMES_PER_SEC  10000000
 #define REFTIMES_PER_MILLISEC  10000
@@ -35,6 +36,10 @@ const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 const IID IID_IAudioClient = __uuidof(IAudioClient);
 const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
+bool WASAPISoundDriver::ValidateDriver()
+{
+	return true;
+}
 
 WASAPISoundDriver::WASAPISoundDriver()
 {

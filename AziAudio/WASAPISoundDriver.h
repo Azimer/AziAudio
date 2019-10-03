@@ -46,6 +46,8 @@ public:
 	// Override the default in SoundDriver
 	//u32 WASAPISoundDriver::LoadAiBuffer(u8 *start, u32 length);
 
+	static bool ValidateDriver();
+
 protected:
 	static DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter);
 
@@ -57,6 +59,7 @@ private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
 	bool   m_CoUninit;
+	static bool ClassRegistered;
 };
 
 #if !defined(_MSC_VER)

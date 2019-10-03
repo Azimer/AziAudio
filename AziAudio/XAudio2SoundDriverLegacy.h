@@ -77,6 +77,7 @@ public:
 	//void PlayBuffer(int bufferNumber, u8* bufferData, int bufferSize);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriverLegacy(); }
+	static bool ValidateDriver();
 
 protected:
 
@@ -86,6 +87,7 @@ protected:
 private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
+	static bool ClassRegistered;
 };
 
 /*

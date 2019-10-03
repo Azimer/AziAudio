@@ -19,10 +19,20 @@
 #pragma comment(lib, "winmm.lib")
 
 #if 1 /* Disable this driver */
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WAVEOUT, WaveOutSoundDriver::CreateSoundDriver, "WaveOut Driver", 1);
+bool WaveOutSoundDriver::ClassRegistered = ValidateDriver() ?
+		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WAVEOUT, WaveOutSoundDriver::CreateSoundDriver, "WaveOut Driver", 1) :
+		false;
 #endif
 
 static WaveOutSoundDriver* m_Instance; // TODO:  Find an alternative to a static class point
+
+/*
+	Will verify the driver can run in the configured environment
+*/
+bool WaveOutSoundDriver::ValidateDriver()
+{
+	return true;
+}
 
 WaveOutSoundDriver::WaveOutSoundDriver()
 {

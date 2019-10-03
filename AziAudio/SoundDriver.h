@@ -55,6 +55,7 @@ public:
 protected:
 	// Temporary (to allow for incremental development)
 	bool m_audioIsInitialized;
+	bool m_isValid;
 
 	// Mutex Handle
 #ifdef _WIN32

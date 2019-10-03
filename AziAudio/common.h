@@ -12,7 +12,7 @@
 //************ Configuration Section ************** (to be moved to compile time defines)
 
 // Configure the plugin to have a console window for informational output -- should be used for debugging only
-//#define USE_PRINTF
+#define USE_PRINTF
 
 #ifdef _WIN32
 #define ENABLE_BACKEND_DIRECTSOUND8_LEGACY

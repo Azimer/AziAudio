@@ -65,6 +65,44 @@ SoundDriverType SoundDriverFactory::DefaultDriver()
 	return retVal;
 }
 
+SoundDriverInterface* SoundDriverFactory::FailoverDriver()
+{
+	SoundDriverType drivers[MAX_FACTORY_DRIVERS];
+	int index[MAX_FACTORY_DRIVERS];
+	bool sorted = false;
+
+	// Copy the drivers
+	for (int x = 0; x < FactoryNextSlot; x++)
+	{
+		drivers[x] = FactoryDrivers[x].DriverType;
+		index[x] = x;
+	}
+
+	// Sort on priority
+	while (sorted == false)
+	{
+		sorted = true;
+		for (int x = 0; x < FactoryNextSlot-1; x++)
+		{
+			if (FactoryDrivers[index[x]].Priority <
+				FactoryDrivers[index[x+1]].Priority)
+			{
+				int i;
+				i = index[x];
+				index[x] = index[x + 1];
+				index[x + 1] = i;
+				sorted = false;
+			}
+		}
+	}
+
+	// Return the first one that doesn't fail to initialize
+	for (int x = 0; x < FactoryNextSlot - 1; x++)
+	{
+	}
+	return NULL;
+}
+
 int SoundDriverFactory::EnumDrivers(SoundDriverType *drivers, int max_entries)
 {
 	int retVal = 0;

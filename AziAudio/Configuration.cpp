@@ -148,7 +148,7 @@ void Configuration::LoadDefaults()
 	}
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
-	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10);
+	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
 	setDriver(SoundDriverFactory::DefaultDriver());	
 	setAIEmulation(true);
 	setSyncAudio(true);
