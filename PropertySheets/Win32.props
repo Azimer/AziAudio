@@ -16,7 +16,7 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet></EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>

@@ -14,7 +14,7 @@ NoSound Driver to demonstrate how to use the SoundDriver interface
 
 #pragma once
 #include "common.h"
-#include "SoundDriverLegacy.h"
+#include "SoundDriver.h"
 
 #if !defined(_WIN32) && !defined(_XBOX)
 typedef union _LARGE_INTEGER {
@@ -33,7 +33,7 @@ typedef union _LARGE_INTEGER {
 #endif
 
 class NoSoundDriver :
-	public SoundDriverLegacy
+	public SoundDriver
 {
 public:
 	NoSoundDriver() {};
@@ -51,9 +51,6 @@ public:
 
 	static SoundDriverInterface* CreateSoundDriver() { return new NoSoundDriver(); }
 
-	u32 GetReadStatus() { return 0;  }
-	u32 AddBuffer(u8 *, u32) { return 0; }
-
 
 protected:
 	bool dllInitialized;
@@ -64,4 +61,5 @@ protected:
 	LARGE_INTEGER countsPerSample;
 	*/
 	bool isPlaying;
+	u32 lastTick;
 };

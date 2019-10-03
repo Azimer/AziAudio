@@ -11,6 +11,7 @@
 #pragma once
 
 #include "common.h"
+#include "Settings.h"
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -30,20 +31,27 @@ protected:
 #endif
 	static void LoadSettings();
 	static void SaveSettings();
-	static bool configAIEmulation;
-	static bool configSyncAudio;
-	static bool configForceSync;
 	static unsigned long configVolume;
 	static char configAudioLogFolder[MAX_FOLDER_LENGTH];
 	//static LPGUID configDevice;
 	static SoundDriverType configDriver;
-	static unsigned long configFrequency;
-	static unsigned long configBitRate;
-	static unsigned long configBufferLevel; // 1-9
-	static unsigned long configBufferFPS;
-	static unsigned long configBackendFPS;
-	static bool configDisallowSleepXA2;
-	static bool configDisallowSleepDS8;
+	static Settings currentSettings;
+
+	// Setters
+	static void setAIEmulation(bool value) { currentSettings.configAIEmulation = value; }
+	static void setSyncAudio(bool value)   { currentSettings.configSyncAudio = value; }
+	static void setForceSync(bool value)  { currentSettings.configForceSync = value; }
+	static void setVolume(unsigned long value) { configVolume = value; }
+	static void setDriver(SoundDriverType value) { configDriver = value; }
+	static void setFrequency(unsigned long value) { currentSettings.configFrequency = value; }
+	static void setBitRate(unsigned long value) { currentSettings.configBitRate = value; }
+	static void setBufferLevel(unsigned long value) { currentSettings.configBufferLevel = value; }
+	static void setBufferFPS(unsigned long value) { currentSettings.configBufferFPS = value; }
+	static void setBackendFPS(unsigned long value) { currentSettings.configBackendFPS = value; }
+	static void setDisallowSleepXA2(bool value) { currentSettings.configDisallowSleepXA2 = value; };
+	static void setDisallowSleepDS8(bool value) { currentSettings.configDisallowSleepDS8 = value; };
+
+	static void ResetAdvancedPage(HWND hDlg);
 
 public:
 	static void LoadDefaults();
@@ -52,9 +60,9 @@ public:
 	static void AboutDialog(HWND hParent);
 #endif
 	// Accessors for the Configuration variables to prevent changes outside of Configuration.cpp
-	static bool getAIEmulation() { return configAIEmulation; }
-	static bool getSyncAudio()   { return configSyncAudio; }
-	static bool getForceSync()  { return configForceSync; }
+	static bool getAIEmulation() { return currentSettings.configAIEmulation; }
+	static bool getSyncAudio()   { return currentSettings.configSyncAudio; }
+	static bool getForceSync()  { return currentSettings.configForceSync; }
 	static unsigned long getVolume() { return configVolume; }
 	static char* getAudioLogFolder() {
 		static char retVal[MAX_FOLDER_LENGTH];
@@ -65,12 +73,11 @@ public:
 	static LPGUID getDevice() { return configDevice; }
 #endif
 	static SoundDriverType getDriver() { return configDriver; }
-	static unsigned long getFrequency() { return configFrequency; }
-	static unsigned long getBitRate() { return configBitRate; }
-	static unsigned long getBufferLevel() { return configBufferLevel; }
-	static unsigned long getBufferFPS() { return configBufferFPS; }
-	static unsigned long getBackendFPS() { return configBackendFPS; }
-	static bool getDisallowSleepXA2() { return configDisallowSleepXA2; };
-	static bool getDisallowSleepDS8() { return configDisallowSleepDS8; };
-
+	static unsigned long getFrequency() { return currentSettings.configFrequency; }
+	static unsigned long getBitRate() { return currentSettings.configBitRate; }
+	static unsigned long getBufferLevel() { return currentSettings.configBufferLevel; }
+	static unsigned long getBufferFPS() { return currentSettings.configBufferFPS; }
+	static unsigned long getBackendFPS() { return currentSettings.configBackendFPS; }
+	static bool getDisallowSleepXA2() { return currentSettings.configDisallowSleepXA2; };
+	static bool getDisallowSleepDS8() { return currentSettings.configDisallowSleepDS8; };
 };

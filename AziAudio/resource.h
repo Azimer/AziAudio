@@ -28,7 +28,6 @@
 #define IDC_BACKEND                     1015
 #define IDC_COMBO2                      1016
 #define IDC_DEVICE3                     1016
-#define IDC_PROFILE                     1016
 #define IDC_SLIDER_BUFFERFPS            1017
 #define IDC_SLIDER_BACKFPS              1018
 #define IDC_SLIDER_BUFFERFPS2           1019
@@ -36,6 +35,9 @@
 #define IDC_BUFFERS_TEXT                1020
 #define IDC_SLIDER_BACKFPS_TEXT         1021
 #define IDC_SLIDER_BUFFERFPS_TEXT       1022
+#define IDC_PROFILE_NEW                 1023
+#define IDC_PROFILE_DELETE              1024
+#define IDC_PROFILE                     1025
 
 // Next default values for new objects
 // 
@@ -43,7 +45,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        104
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1023
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -13,23 +13,18 @@
 */
 #include "NoSoundDriver.h"
 #include "SoundDriverFactory.h"
+#if !defined(_WIN32) && !defined(_XBOX)
+#include <unistd.h>
+#endif
 
 static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0);
 
 Boolean NoSoundDriver::Initialize()
 {
-	/*
-	Boolean result;
-#ifdef _WIN32
-	result = QueryPerformanceFrequency(&perfFreq);
-	result = QueryPerformanceCounter(&perfLast) || result;
-#else
-	result = false;
-#endif
-	*/
 	dllInitialized = true;
 	isPlaying = false;
 	m_SamplesPerSecond = false;
+	lastTick = 0;
 	return true;
 }
 
@@ -37,47 +32,48 @@ void NoSoundDriver::DeInitialize()
 {
 	isPlaying = false;
 	dllInitialized = false;
+	lastTick = 0;
 }
 
 // Management functions
 void NoSoundDriver::AiUpdate(Boolean Wait)
 {
-	//LARGE_INTEGER sampleInterval;
-	long samples;
+	u32 bytes;
+	u32 tick, tickdiff;
+	Wait = Wait; // Avoids unreferences parameter warning.  Required as part of the Project64 API
 
-	//if (Wait)
-	//	WaitMessage(); 
+	// GetTickCount - Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
 #if defined(_WIN32) || defined(_XBOX)
-	if (Wait == TRUE)
-		Sleep(1);
-#else
-	if (Wait == TRUE)
-		SDL_Delay(10);
-#endif
-	
+	if (lastTick == 0)
+		lastTick = GetTickCount(); 
+#endif	
+
 	if (isPlaying == true)
 	{
-		samples = m_SamplesPerSecond / (1000 / 1);
-		//LoadAiBuffer(NULL, samples * 4);
-	}
-	
-	/*
-	if (isPlaying == true && countsPerSample.QuadPart > 0)
-	{
-#ifdef _WIN32
-		QueryPerformanceCounter(&perfTimer);
+#if defined(_WIN32) || defined(_XBOX)
+		Sleep(5);
+		tick = GetTickCount();
+		tickdiff = tick - lastTick;
+		lastTick = tick;
 #else
-		// To do:  Replace this with SDL, or Linux audio won't play.
-#endif
-		sampleInterval.QuadPart = perfTimer.QuadPart - perfLast.QuadPart;
-		samples = (long)(sampleInterval.QuadPart / countsPerSample.QuadPart);
-		if (samples > 0)
+		usleep(5);
+		tickdiff = 50;
+#endif	
+		if (tickdiff > 50)
 		{
-			perfLast.QuadPart = perfTimer.QuadPart;// += countsPerSample.QuadPart * samples;
-			LoadAiBuffer(NULL, samples * 4); // NULL means it won't actually try to fill a buffer
+			tickdiff = 50;
 		}
+		bytes = (m_SamplesPerSecond / 1000) * 4 * tickdiff; // Play tickdiff ms of audio
+		if (bytes > 0) LoadAiBuffer(NULL, bytes);
 	}
-	*/
+	else
+	{
+#if defined(_WIN32) || defined(_XBOX)
+		Sleep(1);
+#else
+		usleep(1);
+#endif	
+	}
 }
 
 void NoSoundDriver::StopAudio()
@@ -87,11 +83,6 @@ void NoSoundDriver::StopAudio()
 
 void NoSoundDriver::StartAudio()
 {
-	/*
-#ifdef _WIN32
-	QueryPerformanceCounter(&perfLast);
-#endif
-	*/
 	isPlaying = true;
 }
 
@@ -99,15 +90,6 @@ void NoSoundDriver::SetFrequency(u32 Frequency)
 {
 #ifdef _WIN32
 	UNREFERENCED_PARAMETER(Frequency);
-	//int SamplesPerSecond = Frequency; // 16 bit * stereo
-
-	// Must determine the number of Counter units per Sample
-	/*QueryPerformanceFrequency(&perfFreq); // Counters per Second
-
-	countsPerSample.QuadPart = perfFreq.QuadPart / SamplesPerSecond;
-	QueryPerformanceCounter(&perfTimer);
-	perfLast.QuadPart = perfTimer.QuadPart;*/
 #else
-	// To do:  Replace this with SDL, or Linux audio won't play.
 #endif
 }

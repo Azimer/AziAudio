@@ -26,29 +26,14 @@ extern SoundDriverInterface *snd;
 
 // ************* Member Variables *************
 
-bool Configuration::configAIEmulation;
-bool Configuration::configSyncAudio;
-bool Configuration::configForceSync;
 unsigned long Configuration::configVolume;
 char Configuration::configAudioLogFolder[MAX_FOLDER_LENGTH];
 /* TODO: Enable device selection...  is this even possible across multiple API implementations? */
 #if 0 /* Disable Device Configuration */
 LPGUID Configuration::configDevice;
 #endif
+Settings Configuration::currentSettings;
 SoundDriverType Configuration::configDriver;
-
-// Host SampleRate / BitRate - Seems to help Frank #188
-unsigned long Configuration::configFrequency;
-unsigned long Configuration::configBitRate;
-
-// Used for NewAudio only
-unsigned long Configuration::configBufferLevel; 
-unsigned long Configuration::configBufferFPS;
-unsigned long Configuration::configBackendFPS;
-
-// Prevent various sleep states from taking place
-bool Configuration::configDisallowSleepXA2;
-bool Configuration::configDisallowSleepDS8;
 
 // Todo: Setting to identify which audio backend is being used
 
@@ -69,7 +54,7 @@ const char *ConfigFile = "Config/AziCfg.bin";
 
 // Dialog Procedures
 #if defined(_WIN32)
-BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
+//BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
 INT_PTR CALLBACK ConfigProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -99,20 +84,20 @@ void Configuration::LoadSettings()
 			fputs("Failed to close config file stream.\n", stderr);
 	}
 
-	Configuration::configSyncAudio = (azicfg[0] != 0x00) ? true : false;
-	Configuration::configForceSync = (azicfg[1] != 0x00) ? true : false;
-	Configuration::configAIEmulation = (azicfg[2] != 0x00) ? true : false;
-	Configuration::configVolume = (azicfg[3] > 100) ? 100 : azicfg[3];
+	setSyncAudio((azicfg[0] != 0x00) ? true : false);
+	setForceSync((azicfg[1] != 0x00) ? true : false);
+	setAIEmulation((azicfg[2] != 0x00) ? true : false);
+	setVolume((azicfg[3] > 100) ? 100 : azicfg[3]);
 	if (file_size > 4)
 	{
-		Configuration::configDriver = (SoundDriverType)(azicfg[4] << 8 | azicfg[5]);
+		setDriver((SoundDriverType)(azicfg[4] << 8 | azicfg[5]));
 		if (configDriver < 0x1000 || configDriver > 0x1FFF)
-			configDriver = SND_DRIVER_NOSOUND;
-		if (azicfg[6] > 0) 	configBufferLevel = azicfg[6];
-		if (azicfg[7] > 0) 	configBufferFPS = azicfg[7];
-		if (azicfg[8] > 0) 	configBackendFPS = azicfg[8];
-		configDisallowSleepXA2 = (azicfg[9] != 0x00) ? true : false;
-		configDisallowSleepDS8 = (azicfg[10] != 0x00) ? true : false;
+			setDriver(SND_DRIVER_NOSOUND);
+		if (azicfg[6] > 0) 	setBufferLevel(azicfg[6]);
+		if (azicfg[7] > 0) 	setBufferFPS(azicfg[7]);
+		if (azicfg[8] > 0) 	setBackendFPS(azicfg[8]);
+		setDisallowSleepXA2((azicfg[9] != 0x00) ? true : false);
+		setDisallowSleepDS8((azicfg[10] != 0x00) ? true : false);
 	}
 	if (SoundDriverFactory::DriverExists(configDriver) == false)
 	{
@@ -125,16 +110,16 @@ void Configuration::SaveSettings()
 	file = fopen(ConfigFile, "wb");
 	if (file != NULL)
 	{
-		fprintf(file, "%c", configSyncAudio);
-		fprintf(file, "%c", configForceSync);
-		fprintf(file, "%c", configAIEmulation);
-		fprintf(file, "%c", configVolume);
-		fprintf(file, "%c%c", (configDriver >> 8) & 0xFF, configDriver & 0xFF);
-		fprintf(file, "%c", configBufferLevel);
-		fprintf(file, "%c", configBufferFPS);
-		fprintf(file, "%c", configBackendFPS);
-		fprintf(file, "%c", configDisallowSleepXA2);
-		fprintf(file, "%c", configDisallowSleepDS8);
+		fprintf(file, "%c", getSyncAudio());
+		fprintf(file, "%c", getForceSync());
+		fprintf(file, "%c", getAIEmulation());
+		fprintf(file, "%c", getVolume());
+		fprintf(file, "%c%c", (getDriver() >> 8) & 0xFF, getDriver() & 0xFF);
+		fprintf(file, "%c", getBufferLevel());
+		fprintf(file, "%c", getBufferFPS());
+		fprintf(file, "%c", getBackendFPS());
+		fprintf(file, "%c", getDisallowSleepXA2());
+		fprintf(file, "%c", getDisallowSleepDS8());
 		fclose(file);
 	}
 }
@@ -152,18 +137,6 @@ void Configuration::LoadDefaults()
 #else
 	strcpy(Configuration::configAudioLogFolder, "D:\\");
 #endif
-	// TODO: Query the system and get defaults (windows only?)
-	Configuration::configSyncAudio = true;
-	Configuration::configForceSync = false;
-	Configuration::configAIEmulation = true;
-	Configuration::configVolume = 0; /* 0:  max volume; 100:  min volume */
-	configFrequency = 44100; // Not implemented -- needs testing
-	configBitRate   = 16;    // Not implemented -- needs testing
-	configBufferLevel = 3;  // NewAudio only - How many frames to buffer
-	configBufferFPS = 45;   // NewAudio only - How much data to frame per second
-	configBackendFPS = 90;  // NewAudio only - How much data to frame per second
-	configDisallowSleepXA2 = false;
-	configDisallowSleepDS8 = false;
 #if 0 /* Disable Device Configuration */
 	configDevice = NULL;
 	if ((DirectSoundEnumerate(DSEnumProc, NULL)) != DS_OK)
@@ -174,8 +147,20 @@ void Configuration::LoadDefaults()
 		printf("Unable to enumerate DirectSound devices\n");
 	}
 #endif
+	configVolume = 0; /* 0:  max volume; 100:  min volume */
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10);
-	configDriver = SoundDriverFactory::DefaultDriver();	
+	setDriver(SoundDriverFactory::DefaultDriver());	
+	setAIEmulation(true);
+	setSyncAudio(true);
+	setForceSync(false);
+	setVolume(0);
+	setFrequency(44100);
+	setBitRate(16);
+	setBufferLevel(3);
+	setBufferFPS(45);
+	setBackendFPS(90);
+	setDisallowSleepDS8(false);
+	setDisallowSleepXA2(false);
 	LoadSettings();
 }
 #ifdef _WIN32
@@ -261,8 +246,8 @@ BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, L
 }
 #endif
 #endif
-
 #if defined(_WIN32) && !defined(_XBOX)
+#if 0 // Unused code -- old configuration
 INT_PTR CALLBACK Configuration::ConfigProc(
 	HWND hDlg,  // handle to dialog box
 	UINT uMsg,     // message
@@ -294,10 +279,10 @@ INT_PTR CALLBACK Configuration::ConfigProc(
 				SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_SETCURSEL, x, 0);
 		}
 
-		SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_SETCHECK, Configuration::configForceSync ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_SETCHECK, Configuration::configSyncAudio ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_AI), BM_SETCHECK, Configuration::configAIEmulation ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_SETPOS, TRUE, Configuration::configVolume);
+		SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_SETCHECK, getForceSync() ? BST_CHECKED : BST_UNCHECKED, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_SETCHECK, getSyncAudio() ? BST_CHECKED : BST_UNCHECKED, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_AI), BM_SETCHECK, getAIEmulation() ? BST_CHECKED : BST_UNCHECKED, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_SETPOS, TRUE, getVolume());
 		SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_SETTICFREQ, 20, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_SETRANGEMIN, FALSE, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_SETRANGEMAX, FALSE, 100);
@@ -313,9 +298,9 @@ INT_PTR CALLBACK Configuration::ConfigProc(
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			configForceSync = SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configSyncAudio = SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configAIEmulation = SendMessage(GetDlgItem(hDlg, IDC_AI), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
+			setForceSync(SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setSyncAudio(SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setAIEmulation(SendMessage(GetDlgItem(hDlg, IDC_AI), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
 #if 0 /* Disable Device Enumeration - NYI */
 			x = (int)SendMessage(GetDlgItem(hDlg, IDC_DEVICE), CB_GETCURSEL, 0, 0);  // TODO: need to save and switch devices
 			if (x == 0)
@@ -374,6 +359,36 @@ INT_PTR CALLBACK Configuration::ConfigProc(
 	return FALSE;
 
 }
+#endif
+
+void Configuration::ResetAdvancedPage(HWND hDlg)
+{
+	Settings tmp = currentSettings;
+	SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_SETCHECK, tmp.configForceSync ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_SETCHECK, tmp.configSyncAudio ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_AI), BM_SETCHECK, tmp.configAIEmulation ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETTICFREQ, 1, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETRANGEMIN, FALSE, 2);
+	SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETRANGEMAX, FALSE, 9);
+	SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETPOS, TRUE, tmp.configBufferLevel);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETTICFREQ, 1, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETRANGEMIN, FALSE, 1);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETRANGEMAX, FALSE, 8);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETPOS, TRUE, (tmp.configBackendFPS / 15));
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETTICFREQ, 1, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETRANGEMIN, FALSE, 1);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETRANGEMAX, FALSE, 8);
+	SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETPOS, TRUE, (tmp.configBufferFPS / 15));
+	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_SETCHECK, tmp.configDisallowSleepDS8 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_SETCHECK, tmp.configDisallowSleepXA2 ? BST_CHECKED : BST_UNCHECKED, 0);
+	char textPos[20];
+	sprintf(textPos, "%i", tmp.configBufferLevel);
+	SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
+	sprintf(textPos, "%i ms", 1000 / tmp.configBackendFPS);
+	SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
+	sprintf(textPos, "%i ms", 1000 / tmp.configBufferFPS);
+	SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
+}
 
 INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -382,69 +397,55 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 	switch (uMsg)
 	{
 	case WM_INITDIALOG:
-		SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_SETCHECK, configForceSync ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_SETCHECK, configSyncAudio ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_AI), BM_SETCHECK, configAIEmulation ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETTICFREQ, 1, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETRANGEMIN, FALSE, 2);
-		SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETRANGEMAX, FALSE, 9);
-		SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_SETPOS, TRUE, configBufferLevel);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETTICFREQ, 1, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETRANGEMIN, FALSE, 1);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETRANGEMAX, FALSE, 8);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_SETPOS, TRUE, (configBackendFPS / 15));
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETTICFREQ, 1, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETRANGEMIN, FALSE, 1);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETRANGEMAX, FALSE, 8);
-		SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_SETPOS, TRUE, (configBufferFPS / 15));
-		SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_SETCHECK, configDisallowSleepDS8 ? BST_CHECKED : BST_UNCHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_SETCHECK, configDisallowSleepXA2 ? BST_CHECKED : BST_UNCHECKED, 0);
-
-		char textPos[20];
-		sprintf(textPos, "%i", configBufferLevel);
-		SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
-		sprintf(textPos, "%i ms", 1000/configBackendFPS);
-		SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
-		sprintf(textPos, "%i ms", 1000/configBufferFPS);
-		SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
-
+		{
+			SendMessage(GetDlgItem(hDlg, IDC_PROFILE), CB_RESETCONTENT, 0, 0);
+			ResetAdvancedPage(hDlg);
+	}
 		break;
+	//case WM_COMMAND:
+	//{
+	//	switch (LOWORD(wParam))
+	//	{
+	//	}
+	//}
+	break;
 	case WM_NOTIFY:
 		if (((NMHDR FAR *) lParam)->code == PSN_APPLY) {
-			configForceSync = SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configSyncAudio = SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configAIEmulation = SendMessage(GetDlgItem(hDlg, IDC_AI), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configBufferLevel = SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0);
-			configBackendFPS = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0)*15;
-			configBufferFPS = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0)*15;
-			configDisallowSleepDS8 = SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
-			configDisallowSleepXA2 = SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false;
+			setForceSync(SendMessage(GetDlgItem(hDlg, IDC_OLDSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setSyncAudio(SendMessage(GetDlgItem(hDlg, IDC_AUDIOSYNC), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setAIEmulation(SendMessage(GetDlgItem(hDlg, IDC_AI), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setBufferLevel((unsigned long)SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0));
+			setBackendFPS((unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0) * 15);
+			setBufferFPS((unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0) * 15);
+			setDisallowSleepDS8(SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+			setDisallowSleepXA2(SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_GETSTATE, 0, 0) == BST_CHECKED ? true : false);
+		}
+		else if (((NMHDR FAR *) lParam)->code == PSN_RESET) {
 		}
 		break;
 	case WM_HSCROLL:
 		if (lParam != NULL)
 		{
 			char textPos[20];
-			int dwPosition;
+			unsigned long dwPosition;
 			switch (GetDlgCtrlID((HWND)lParam))
 			{
 				case IDC_BUFFERS:					
-					dwPosition = SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0);
+					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0);
 					sprintf(textPos, "%i", dwPosition);
 					SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BACKFPS:
-					dwPosition = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0);
+					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0);
 					sprintf(textPos, "%i ms", (DWORD)(1000/(dwPosition*15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BUFFERFPS:
-					dwPosition = SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0);
+					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0);
 					sprintf(textPos, "%i ms", (DWORD)(1000 / (dwPosition * 15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 					break;
 			}
-
 		}
 	default:
 		return FALSE;
@@ -460,11 +461,11 @@ INT_PTR CALLBACK Configuration::SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam
 	case WM_INITDIALOG:
 		SendMessage(GetDlgItem(hDlg, IDC_DEVICE), CB_RESETCONTENT, 0, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_RESETCONTENT, 0, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_DEVICE), CB_ADDSTRING, 0, (long)"Default");
+		SendMessage(GetDlgItem(hDlg, IDC_DEVICE), CB_ADDSTRING, 0, (LPARAM)(char *)"Default");
 		SendMessage(GetDlgItem(hDlg, IDC_DEVICE), CB_SETCURSEL, 0, 0);
 		for (x = 0; x < EnumDriverCount; x++)
 		{
-			SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_ADDSTRING, 0, (long)SoundDriverFactory::GetDriverDescription(EnumDriverType[x]));
+			SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_ADDSTRING, 0, (LPARAM)SoundDriverFactory::GetDriverDescription(EnumDriverType[x]));
 			if (EnumDriverType[x] == configDriver)
 				SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_SETCURSEL, x, 0);
 		}
@@ -483,10 +484,10 @@ INT_PTR CALLBACK Configuration::SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam
 		break;
 	case WM_NOTIFY:
 		if (((NMHDR FAR *) lParam)->code == PSN_APPLY) {
-			Configuration::configVolume = SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_GETPOS, 0, 0);
+			Configuration::configVolume = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_GETPOS, 0, 0);
 			snd->SetVolume(Configuration::configVolume);
 
-			x = (int)SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_GETCURSEL, 0, 0);
+			x = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_BACKEND), CB_GETCURSEL, 0, 0);
 			if (EnumDriverType[x] != configDriver)
 				configDriver = EnumDriverType[x];
 		}
@@ -514,7 +515,7 @@ INT_PTR CALLBACK Configuration::SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam
 		short int userReq = LOWORD(wParam);
 		if (userReq == TB_ENDTRACK || userReq == TB_THUMBTRACK)
 		{
-			int dwPosition = SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_GETPOS, 0, 0);
+			unsigned long dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_VOLUME), TBM_GETPOS, 0, 0);
 			if (dwPosition == 100)
 			{
 				SendMessage(GetDlgItem(hDlg, IDC_MUTE), BM_SETCHECK, BST_CHECKED, 0);

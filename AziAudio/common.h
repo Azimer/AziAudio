@@ -97,8 +97,6 @@ extern rSettings RegSettings;
 #define HLECODE   1
 #define CPUCODE   2
 
-unsigned long GenerateCRC (unsigned char *data, int size);
-
 #define PLUGIN_NAME     "Audio"
 
 #ifdef DEVBUILD
@@ -114,7 +112,7 @@ unsigned long GenerateCRC (unsigned char *data, int size);
 #endif
 #else
 #ifdef _DEBUG
-#define PLUGIN_DEBUG " (Debug r42)"
+#define PLUGIN_DEBUG " (Debug r59)"
 #else
 #define PLUGIN_DEBUG ""
 #endif

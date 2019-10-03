@@ -3,7 +3,8 @@
 
   <PropertyGroup Label="Configuration">
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset Condition="'$(DefaultPlatformToolset)'!=''">$(DefaultPlatformToolset)_xp</PlatformToolset>
+    <PlatformToolset Condition="'$(DefaultPlatformToolset)'!='' AND '$(DefaultPlatformToolset)'!='v142'">$(DefaultPlatformToolset)_xp</PlatformToolset>
+    <PlatformToolset Condition="'$(DefaultPlatformToolset)'=='v142'">$(DefaultPlatformToolset)</PlatformToolset>
   </PropertyGroup>
 
   <ImportGroup Label="PropertySheets">
@@ -39,7 +40,7 @@
       <StructMemberAlignment>Default</StructMemberAlignment>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>Not Set</EnableEnhancedInstructionSet>
       <FloatingPointModel>Precise</FloatingPointModel>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
