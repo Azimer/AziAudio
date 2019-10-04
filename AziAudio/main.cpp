@@ -33,6 +33,8 @@ SoundDriverInterface *snd = NULL;
 bool ai_delayed_carry;  // Borrowed from MAME and Mupen64Plus
 bool bBackendChanged = false;
 
+void SetTimerResolution(void);
+
 #ifdef USE_PRINTF
   void RedirectIOToConsole();
 #endif
@@ -105,6 +107,11 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 #endif
 	Dacrate = 0;
 	//CloseDLL ();
+
+	if (Configuration::getResTimer() == true)
+	{
+		SetTimerResolution();
+	}
 
 	memcpy(&AudioInfo, &Audio_Info, sizeof(AUDIO_INFO));
 	DRAM = Audio_Info.RDRAM;
@@ -328,5 +335,25 @@ void RedirectIOToConsole() {
 	
 #endif
 }
+
+
+#ifdef _WIN32
+/*
+	Time resolution code borrowed from Project64-Audio
+	Will be set as an optional parameter
+ 
+ */
+void SetTimerResolution(void)
+{
+	HMODULE hMod = GetModuleHandle("ntdll.dll");
+	if (hMod != NULL)
+	{
+		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN BOOLEAN SetResolution, OUT PULONG CurrentResolution);
+		tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hMod, "NtSetTimerResolution");
+		ULONG CurrentResolution = 0;
+		NtSetTimerResolution(10000, TRUE, &CurrentResolution);
+	}
+}
+#endif
 
 #endif

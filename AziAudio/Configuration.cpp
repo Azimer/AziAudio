@@ -161,6 +161,7 @@ void Configuration::LoadDefaults()
 	setBackendFPS(90);
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
+	setResTimer(false);
 	LoadSettings();
 }
 #ifdef _WIN32

@@ -14,6 +14,7 @@ public:
 	bool configDisallowSleepXA2;
 	bool configDisallowSleepDS8;
 	unsigned long configBitRate;
+	bool configResTimer;
 
 	u16 CartID;
 	char CartName[21];

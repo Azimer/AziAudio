@@ -26,11 +26,11 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 	// Bleed off some of this buffer to smooth out audio
 	if ((length < m_MaxBufferSize) && (Configuration::getSyncAudio() == true) /*&& m_AI_DMAPrimaryBytes > 0*/)
 	{
-		if (m_MaxBufferSize == m_BufferRemaining)
+		if (m_AI_DMASecondaryBuffer > 0)
 		{
 			DEBUG_OUTPUT("B"); // Debug that we overflowed (shouldn't happen with locked FPS)
 		}
-		while (m_MaxBufferSize < (m_BufferRemaining + length))
+		while (m_AI_DMASecondaryBuffer > 0)
 		{
 #ifdef _WIN32
 			Sleep(1);
