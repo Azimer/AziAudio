@@ -10,6 +10,7 @@
 ****************************************************************************/
 
 #include "SoundDriver.h"
+#include "WaveOut.h"
 
 // Load the buffer from the AI interface to our emulated buffer
 void SoundDriver::AI_LenChanged(u8 *start, u32 length)
@@ -26,11 +27,11 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 	// Bleed off some of this buffer to smooth out audio
 	if ((length < m_MaxBufferSize) && (Configuration::getSyncAudio() == true) /*&& m_AI_DMAPrimaryBytes > 0*/)
 	{
-		if (m_AI_DMASecondaryBuffer > 0)
+		if (m_MaxBufferSize == m_BufferRemaining)
 		{
 			DEBUG_OUTPUT("B"); // Debug that we overflowed (shouldn't happen with locked FPS)
 		}
-		while (m_AI_DMASecondaryBuffer > 0)
+		while (m_MaxBufferSize < m_BufferRemaining)
 		{
 #ifdef _WIN32
 			Sleep(1);
@@ -116,7 +117,7 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 	}
 #endif
 }
-
+WaveOut test;
 void SoundDriver::AI_SetFrequency(u32 Frequency)
 {
 	m_SamplesPerSecond = Frequency;
@@ -124,6 +125,8 @@ void SoundDriver::AI_SetFrequency(u32 Frequency)
 	m_MaxBufferSize = (u32)((Frequency / Configuration::getBufferFPS())) * 4 * Configuration::getBufferLevel();
 	m_BufferRemaining = 0;
 	m_CurrentReadLoc = m_CurrentWriteLoc = m_BufferRemaining = 0;
+	test.EndWaveOut();
+	test.BeginWaveOut("D:\\test.wav", 2, 16, m_SamplesPerSecond);
 }
 
 u32 SoundDriver::AI_ReadLength()
@@ -133,6 +136,7 @@ u32 SoundDriver::AI_ReadLength()
 
 	if (Configuration::getAIEmulation() == false || lastLength == 0)
 		return 0;
+	DEBUG_OUTPUT("R");
 #ifdef _WIN32
 	WaitForSingleObject(m_hMutex, INFINITE);
 #endif
@@ -203,6 +207,7 @@ void SoundDriver::AI_Shutdown()
 #else
 	// to do
 #endif
+	test.EndWaveOut();
 }
 
 void SoundDriver::AI_ResetAudio()
@@ -322,7 +327,8 @@ u32 SoundDriver::LoadAiBuffer(u8 *start, u32 length)
 	}
 
 	// Step 3: Replace depleted stored buffer for next run
-	BufferAudio();
+	BufferAudio();	
+	test.WriteData(ptrStart, length);
 
 #ifdef _WIN32
 	ReleaseMutex(m_hMutex);
