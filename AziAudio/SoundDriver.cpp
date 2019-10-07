@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -31,7 +31,7 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 		{
 			DEBUG_OUTPUT("B"); // Debug that we overflowed (shouldn't happen with locked FPS)
 		}
-		while (m_MaxBufferSize < m_BufferRemaining)
+		while (m_MaxBufferSize == m_BufferRemaining)
 		{
 #ifdef _WIN32
 			Sleep(1);
@@ -51,25 +51,18 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 	puts("[AI_LenChanged] To do:  Working non-Win32 mutex timing.");
 #endif
 	BufferAudio();
-#if 0
+#if 1
 	if (m_AI_DMASecondaryBytes > 0)
 	{
-		// FIFO is full.  We either need to ditch this buffer or wait
-		// TODO: How do we handle interrupts if we end up having to skip a buffer -- chances are if this occurs we 
-		// are using FAT and an overflow occurred.  In that case we wouldn't need to handle the AI emulation in the
-		// first place so we will skip it
-
-		// Fast forward the audio -- attempt to smooth out the audio glitch
+		DEBUG_OUTPUT("X");
 		s32 tmp = m_AI_DMASecondaryBytes - m_AI_DMAPrimaryBytes;
 		if (tmp > 0)
 		{
-			DEBUG_OUTPUT("X");
 			m_AI_DMAPrimaryBuffer = m_AI_DMASecondaryBuffer + tmp; m_AI_DMASecondaryBuffer = NULL;
 			m_AI_DMASecondaryBytes = 0;
 		}
 		else
 		{
-			DEBUG_OUTPUT("X+");
 			m_AI_DMAPrimaryBuffer = m_AI_DMASecondaryBuffer; m_AI_DMASecondaryBuffer = NULL;
 			m_AI_DMAPrimaryBytes = m_AI_DMASecondaryBytes; m_AI_DMASecondaryBytes = 0;
 		}
@@ -97,7 +90,7 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 #ifdef _WIN32
 	ReleaseMutex(m_hMutex);
 #endif
-#if 0
+#if 1
 	// Bleed off some of this buffer to smooth out audio
 	if ((length < m_MaxBufferSize) && (Configuration::getSyncAudio() == true) && m_AI_DMASecondaryBytes > 0)
 	{
@@ -117,7 +110,7 @@ void SoundDriver::AI_LenChanged(u8 *start, u32 length)
 	}
 #endif
 }
-WaveOut test;
+//WaveOut test;
 void SoundDriver::AI_SetFrequency(u32 Frequency)
 {
 	m_SamplesPerSecond = Frequency;
@@ -125,24 +118,23 @@ void SoundDriver::AI_SetFrequency(u32 Frequency)
 	m_MaxBufferSize = (u32)((Frequency / Configuration::getBufferFPS())) * 4 * Configuration::getBufferLevel();
 	m_BufferRemaining = 0;
 	m_CurrentReadLoc = m_CurrentWriteLoc = m_BufferRemaining = 0;
-	test.EndWaveOut();
-	test.BeginWaveOut("D:\\test.wav", 2, 16, m_SamplesPerSecond);
+	//test.EndWaveOut();
+	//test.BeginWaveOut("D:\\test.wav", 2, 16, m_SamplesPerSecond);
 }
 
 u32 SoundDriver::AI_ReadLength()
 {
-	const u32 LENGTHFACTOR = 16;
+	const u32 LENGTHFACTOR = 32;
 	u32 retVal;
 
 	if (Configuration::getAIEmulation() == false || lastLength == 0)
 		return 0;
-	DEBUG_OUTPUT("R");
 #ifdef _WIN32
 	WaitForSingleObject(m_hMutex, INFINITE);
 #endif
 	if (m_BufferRemaining > (lastLength*2 + lastLength/4))
 	{
-		retVal = lastLength;
+		retVal = lastLength;  // TODO: I do not remember why I set this...
 	}
 	else
 	{
@@ -207,7 +199,7 @@ void SoundDriver::AI_Shutdown()
 #else
 	// to do
 #endif
-	test.EndWaveOut();
+	//test.EndWaveOut();
 }
 
 void SoundDriver::AI_ResetAudio()
@@ -231,6 +223,9 @@ void SoundDriver::AI_Update(Boolean Wait)
 
 void SoundDriver::BufferAudio()
 {
+	m_DMAEnabled = (*AudioInfo.AI_CONTROL_REG & AI_CONTROL_DMA_ON) == AI_CONTROL_DMA_ON;
+	if (m_DMAEnabled == false)
+		return;
 	while ((m_BufferRemaining < m_MaxBufferSize) && (m_AI_DMAPrimaryBytes > 0 || m_AI_DMASecondaryBytes > 0))
 	{
 		*(u16 *)(m_Buffer + m_CurrentWriteLoc) = *(u16 *)(m_AI_DMAPrimaryBuffer+2);
@@ -328,7 +323,7 @@ u32 SoundDriver::LoadAiBuffer(u8 *start, u32 length)
 
 	// Step 3: Replace depleted stored buffer for next run
 	BufferAudio();	
-	test.WriteData(ptrStart, length);
+	//test.WriteData(ptrStart, length);
 
 #ifdef _WIN32
 	ReleaseMutex(m_hMutex);

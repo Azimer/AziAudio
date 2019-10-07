@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -42,11 +42,26 @@ static DWORD laststatus = 0;
 static DWORD interruptcnt = 0;
 
 //WaveOut test;
-#define STREAM_DMA
+//#define STREAM_DMA
 
 bool DirectSoundDriverLegacy::ValidateDriver()
 {
-	return true;
+	bool retVal = false;
+	const GUID CLSID_DirectSound8_Test = { 0x3901cc3f, 0x84b5, 0x4fa4, 0xba, 0x35, 0xaa, 0x81, 0x72, 0xb8, 0xa0, 0x9b };
+	const GUID IID_IDirectSound8_Test = { 0xC50A7E93, 0xF395, 0x4834, 0x9E, 0xF6, 0x7F, 0xA9, 0x9D, 0xE5, 0x09, 0x66 };
+
+	/* Validate an DirectSound8 object will initialize */
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	IUnknown* obj;
+	HRESULT hr = CoCreateInstance(CLSID_DirectSound8_Test,
+		NULL, CLSCTX_INPROC_SERVER, IID_IDirectSound8_Test, (void**)&obj);
+	if (SUCCEEDED(hr))
+	{
+		obj->Release();
+		retVal = true;
+	}
+	CoUninitialize();
+	return retVal;
 }
 
 // Fills up a buffer and remixes the audio (Streaming version)
@@ -83,14 +98,14 @@ void DirectSoundDriverLegacy::FillBuffer(BYTE *buff, DWORD len) {
 	DWORD pastFill = readLoc;
 	DWORD pastLoc = (len - remainingBytes) / 2;
 
-	if (configForceSync) {
+	if (Configuration::getForceSync()) {
 		*AudioInfo.MI_INTR_REG |= MI_INTR_AI;
 		AudioInfo.CheckInterrupts();
 		interruptcnt--;
 		*AudioInfo.AI_STATUS_REG &= ~0x80000000;
 		//DEBUG_OUTPUT("I");
 	}
-	if (configAIEmulation == true) {
+	if (Configuration::getAIEmulation() == true) {
 		if (*AudioInfo.AI_STATUS_REG & 0x80000000) {
 			*AudioInfo.MI_INTR_REG |= MI_INTR_AI;
 			AudioInfo.CheckInterrupts();
@@ -511,7 +526,7 @@ void DirectSoundDriverLegacy::AiUpdate(BOOL Wait) {
 		WaitMessage();
 
 #if 0
-	if (configForceSync && (*AudioInfo.AI_STATUS_REG & 0x80000000)) {
+	if (Configuration::getForceSync() && (*AudioInfo.AI_STATUS_REG & 0x80000000)) {
 		if (remainingBytes < LOCK_SIZE * 2) {
 			*AudioInfo.AI_STATUS_REG &= ~0x80000000;
 			*AudioInfo.MI_INTR_REG |= MI_INTR_AI;
@@ -613,7 +628,7 @@ u32 DirectSoundDriverLegacy::AddBuffer(u8 *start, u32 length) {
 		DEBUG_OUTPUT("\nlast: %i, len: %i, MB: %i, SEG: %i\n", lastLength, length, MAXBUFFER, LOCK_SIZE);
 		DEBUG_OUTPUT(",");
 	}
-	if (configSyncAudio && (max > MAXBUFFER)) {
+	if (Configuration::getSyncAudio() && (max > MAXBUFFER)) {
 		while ((remainingBytes + length) > MAXBUFFER) { // Halve the buffer...
 			Sleep(1);
 		}
@@ -622,7 +637,7 @@ u32 DirectSoundDriverLegacy::AddBuffer(u8 *start, u32 length) {
 		// Toss out the extra data...
 		return retVal;
 	}
-	if (configForceSync) {
+	if (Configuration::getForceSync()) {
 		//bool test;
 		if (remainingBytes > LOCK_SIZE * 2) {
 			*AudioInfo.AI_STATUS_REG |= 0xC0000000;
@@ -655,7 +670,7 @@ u32 DirectSoundDriverLegacy::AddBuffer(u8 *start, u32 length) {
 	}
 	ReleaseMutex(hMutex);
 
-	if (configAIEmulation && !configForceSync) {
+	if (Configuration::getAIEmulation() && !Configuration::getForceSync()) {
 		// If the next anticipated length is greater than MAXBUFFER
 		// Make the audio status busy
 		if ((remainingBytes + length) > MAXBUFFER) {

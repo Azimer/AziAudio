@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -44,7 +44,22 @@ static DWORD interruptcnt = 0;
 
 bool DirectSoundDriver::ValidateDriver()
 {
-	return true;
+	bool retVal = false;
+	const GUID CLSID_DirectSound8_Test = { 0x3901cc3f, 0x84b5, 0x4fa4, 0xba, 0x35, 0xaa, 0x81, 0x72, 0xb8, 0xa0, 0x9b };
+	const GUID IID_IDirectSound8_Test = { 0xC50A7E93, 0xF395, 0x4834, 0x9E, 0xF6, 0x7F, 0xA9, 0x9D, 0xE5, 0x09, 0x66 };
+
+	/* Validate an DirectSound8 object will initialize */
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	IUnknown* obj;
+	HRESULT hr = CoCreateInstance(CLSID_DirectSound8_Test,
+		NULL, CLSCTX_INPROC_SERVER, IID_IDirectSound8_Test, (void**)&obj);
+	if (SUCCEEDED(hr))
+	{
+		obj->Release();
+		retVal = true;
+	}
+	CoUninitialize();
+	return retVal;
 }
 
 DWORD WINAPI AudioThreadProc(DirectSoundDriver *ac) {
@@ -388,7 +403,7 @@ void DirectSoundDriver::SetFrequency(u32 Frequency2) {
 	// 
 	StopAudio();
 
-	sLOCK_SIZE = (u32)((Frequency / Configuration::getBufferFPS())) * 4; //(Frequency / 80) * 4;// 0x600;// (22050 / 30) * 4;// 0x4000;// (Frequency / 60) * 4;
+	sLOCK_SIZE = (u32)((Frequency / Configuration::getBackendFPS())) * 4; //(Frequency / 80) * 4;// 0x600;// (22050 / 30) * 4;// 0x4000;// (Frequency / 60) * 4;
 	SampleRate = Frequency;
 	SegmentSize = 0; // Trash it... we need to redo the Frequency anyway...
 	SetSegmentSize(LOCK_SIZE);

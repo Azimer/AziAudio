@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -38,7 +38,22 @@ const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
 bool WASAPISoundDriver::ValidateDriver()
 {
-	return true;
+	bool retVal = false;
+	/* Validate a windows audio services end point enumerator object will initialize */
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	const GUID CLSID_MMDeviceEnumerator_Test = { 0xBCDE0395, 0xE52F, 0x467C, 0x8E, 0x3D, 0xC4, 0x57, 0x92, 0x91, 0x69, 0x2E };
+	const GUID IID_IMMDeviceEnumerator_Test = { 0xA95664D2, 0x9614, 0x4F35, 0xA7, 0x46, 0xDE, 0x8D, 0xB6, 0x36, 0x17, 0xE6 };
+	IUnknown* obj;
+
+	HRESULT hr = CoCreateInstance(CLSID_MMDeviceEnumerator_Test,
+		NULL, CLSCTX_ALL, IID_IMMDeviceEnumerator_Test, (void**)&obj);
+	if (SUCCEEDED(hr))
+	{
+		obj->Release();
+		retVal = true;
+	}
+	CoUninitialize();
+	return retVal;
 }
 
 WASAPISoundDriver::WASAPISoundDriver()

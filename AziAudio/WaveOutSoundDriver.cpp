@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -18,20 +18,24 @@
 
 #pragma comment(lib, "winmm.lib")
 
-#if 1 /* Disable this driver */
+WaveOutSoundDriver* WaveOutSoundDriver::m_Instance;
+
 bool WaveOutSoundDriver::ClassRegistered = ValidateDriver() ?
 		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_WAVEOUT, WaveOutSoundDriver::CreateSoundDriver, "WaveOut Driver", 1) :
 		false;
-#endif
-
-static WaveOutSoundDriver* m_Instance; // TODO:  Find an alternative to a static class point
 
 /*
 	Will verify the driver can run in the configured environment
 */
 bool WaveOutSoundDriver::ValidateDriver()
 {
-	return true;
+	// This should be available in all versions of Windows in the last 25 years
+	WAVEOUTCAPS caps;
+	waveOutGetDevCaps(WAVE_MAPPER, &caps, sizeof(WAVEOUTCAPS));
+	if (caps.dwFormats & WAVE_FORMAT_4S16)
+		return true;
+	else
+		return false;
 }
 
 WaveOutSoundDriver::WaveOutSoundDriver()
@@ -125,8 +129,15 @@ void WaveOutSoundDriver::SetFrequency(u32 Frequency)
 		Teardown();
 		SampleRate = Frequency;
 		Setup();
-		m_OutputBuffersSize = (u32)((Frequency / Configuration::getBackendFPS())) * 4;
-		m_numOutputBuffers = Configuration::getBufferLevel();
+		if (Configuration::getBackendFPS() <= 60)
+		{
+			m_OutputBuffersSize = (u32)((Frequency / Configuration::getBackendFPS())) * 4;
+		}
+		else
+		{
+			m_OutputBuffersSize = (u32)((Frequency / 60)) * 4;
+		}
+		m_numOutputBuffers = 3;// Configuration::getBufferLevel(); // TODO: Is this necessary?  It seems "60 FPS" and 3 buffers is lowest before performance impact
 
 		assert(m_OutputBuffers == NULL);
 		assert(m_BufferMemory == NULL);
