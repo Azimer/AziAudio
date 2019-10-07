@@ -29,7 +29,6 @@ private:
 	static int FactoryNextSlot;
 	static const int MAX_FACTORY_DRIVERS = 20;
 	static FactoryDriversStruct FactoryDrivers[MAX_FACTORY_DRIVERS];
-	static SoundDriverInterface* FailoverDriver();
 public:
 	~SoundDriverFactory() {};
 
