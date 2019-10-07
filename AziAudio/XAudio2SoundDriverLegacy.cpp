@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -16,7 +16,9 @@
 #include <stdio.h>
 #include "SoundDriverFactory.h"
 
-static bool ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2L, XAudio2SoundDriverLegacy::CreateSoundDriver, "XAudio2 Legacy Driver", 11);
+bool XAudio2SoundDriverLegacy::ClassRegistered = XAudio2SoundDriverLegacy::ValidateDriver() ?
+		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2L, XAudio2SoundDriverLegacy::CreateSoundDriver, "XAudio2 Legacy Driver", 11) :
+		false;
 
 static IXAudio2* g_engine;
 static IXAudio2SourceVoice* g_source;
@@ -37,6 +39,27 @@ static int lastLength = 1;
 static int cacheSize = 0;
 static int interrupts = 0;
 static VoiceCallbackLegacy voiceCallback;
+
+bool XAudio2SoundDriverLegacy::ValidateDriver()
+{
+	bool retVal = false;
+	/* Validate an XAudio2 2.7 object will initialize */
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	const GUID CLSID_XAudio2_Test = { 0x5a508685, 0xa254, 0x4fba, 0x9b, 0x82, 0x9a, 0x24, 0xb0, 0x03, 0x06, 0xaf };
+	const GUID IID_IXAudio2_Test = { 0x8bcf1f58, 0x9fe7, 0x4583, 0x8a, 0xc6, 0xe2, 0xad, 0xc4, 0x65, 0xc8, 0xbb };
+	IUnknown* obj;
+
+	HRESULT hr = CoCreateInstance(CLSID_XAudio2_Test,
+		NULL, CLSCTX_INPROC_SERVER, IID_IXAudio2_Test, (void**)&obj);
+	if (SUCCEEDED(hr))
+	{
+		obj->Release();
+		retVal = true;
+	}
+	CoUninitialize();
+	return retVal;
+}
+
 XAudio2SoundDriverLegacy::XAudio2SoundDriverLegacy()
 {
 	g_engine = NULL;

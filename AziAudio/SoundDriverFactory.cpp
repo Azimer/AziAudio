@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -17,14 +17,66 @@ SoundDriverFactory::FactoryDriversStruct SoundDriverFactory::FactoryDrivers[MAX_
 SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType DriverID)
 {
 	SoundDriverInterface *result = NULL;
+	SoundDriverType drivers[MAX_FACTORY_DRIVERS];
+	int index[MAX_FACTORY_DRIVERS];
+	bool sorted = false;
+
+	// Look for our driver
 	for (int x = 0; x < FactoryNextSlot; x++)
 	{
 		if (FactoryDrivers[x].DriverType == DriverID)
 		{
 			result = FactoryDrivers[x].CreateFunction();
-			break;
+			if (result != NULL)
+				break;
 		}
 	}
+
+	/*
+		We have two options here.  See if the Validate is enough to prevent a "NoSound" situation or we need to rework AI_Startup and Initialize.
+		Pros for Validate - We remove the need to do an API overhaul for something that should happen seldomly.
+		Cons for Validate - It doesn't exactly fix a scenario where the API is available but fails to initialize.
+
+		I think for now I am happy where things are unless we see issues.  I have a lot of other things to do so it will stay disabled for now.
+	*/
+#if 0 
+	if (result == NULL)
+	{
+		// *** Start failover ***
+		// Copy the drivers
+		for (int x = 0; x < FactoryNextSlot; x++)
+		{
+			drivers[x] = FactoryDrivers[x].DriverType;
+			index[x] = x;
+		}
+
+		// Sort on priority -- Highest priority is likely best API for the system
+		while (sorted == false)
+		{
+			sorted = true;
+			for (int x = 0; x < FactoryNextSlot - 1; x++)
+			{
+				if (FactoryDrivers[index[x]].Priority <
+					FactoryDrivers[index[x + 1]].Priority)
+				{
+					int i;
+					i = index[x];
+					index[x] = index[x + 1];
+					index[x + 1] = i;
+					sorted = false;
+				}
+			}
+		}
+
+		// Return the first one that doesn't fail to initialize
+		for (int x = 0; x < FactoryNextSlot; x++)
+		{
+			result = FactoryDrivers[index[x]].CreateFunction();
+			if (result != NULL)
+				break;
+		}
+	}
+#endif
 	if (result == NULL)
 		result = new NoSoundDriver();
 

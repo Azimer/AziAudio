@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -76,6 +76,7 @@ public:
 	void SetVolume(u32 volume);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriver(); }
+	static bool ValidateDriver();
 
 protected:
 
@@ -85,6 +86,7 @@ protected:
 private:
 	HANDLE hAudioThread;
 	bool   bStopAudioThread;
+	static bool ClassRegistered;
 };
 
 /*

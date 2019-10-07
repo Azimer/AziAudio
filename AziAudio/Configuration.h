@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -50,6 +50,7 @@ protected:
 	static void setBackendFPS(unsigned long value) { currentSettings.configBackendFPS = value; }
 	static void setDisallowSleepXA2(bool value) { currentSettings.configDisallowSleepXA2 = value; };
 	static void setDisallowSleepDS8(bool value) { currentSettings.configDisallowSleepDS8 = value; };
+	static void setResTimer(bool value) { currentSettings.configResTimer = value; };
 
 	static void ResetAdvancedPage(HWND hDlg);
 
@@ -80,4 +81,5 @@ public:
 	static unsigned long getBackendFPS() { return currentSettings.configBackendFPS; }
 	static bool getDisallowSleepXA2() { return currentSettings.configDisallowSleepXA2; };
 	static bool getDisallowSleepDS8() { return currentSettings.configDisallowSleepDS8; };
+	static bool getResTimer() { return currentSettings.configResTimer; };
 };

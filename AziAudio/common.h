@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -12,7 +12,7 @@
 //************ Configuration Section ************** (to be moved to compile time defines)
 
 // Configure the plugin to have a console window for informational output -- should be used for debugging only
-//#define USE_PRINTF
+#define USE_PRINTF
 
 #ifdef _WIN32
 #define ENABLE_BACKEND_DIRECTSOUND8_LEGACY

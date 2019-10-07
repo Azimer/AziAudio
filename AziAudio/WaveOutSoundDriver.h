@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -43,10 +43,13 @@ public:
 	void SetVolume(u32 volume);
 
 	static SoundDriverInterface* CreateSoundDriver() { return new WaveOutSoundDriver(); }
+	static bool ValidateDriver();
 
 protected:
 
 	static void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+
+	static WaveOutSoundDriver* m_Instance;
 	HWAVEOUT       m_hWave;
 
 	int m_numOutputBuffers;
@@ -57,6 +60,7 @@ protected:
 	u32 SampleRate;
 
 private:
+	static bool ClassRegistered;
 };
 
 #if !defined(_MSC_VER)

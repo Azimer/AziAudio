@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2017 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
@@ -148,7 +148,7 @@ void Configuration::LoadDefaults()
 	}
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
-	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10);
+	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
 	setDriver(SoundDriverFactory::DefaultDriver());	
 	setAIEmulation(true);
 	setSyncAudio(true);
@@ -161,6 +161,7 @@ void Configuration::LoadDefaults()
 	setBackendFPS(90);
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
+	setResTimer(false);
 	LoadSettings();
 }
 #ifdef _WIN32
