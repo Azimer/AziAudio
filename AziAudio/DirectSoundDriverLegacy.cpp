@@ -94,9 +94,6 @@ void DirectSoundDriverLegacy::FillBuffer(BYTE *buff, DWORD len) {
 #else
 void DirectSoundDriverLegacy::FillBuffer(BYTE *buff, DWORD len) {
 	DWORD cnt = 0;
-	DWORD x = 0;
-	DWORD pastFill = readLoc;
-	DWORD pastLoc = (len - remainingBytes) / 2;
 
 	if (Configuration::getForceSync()) {
 		*AudioInfo.MI_INTR_REG |= MI_INTR_AI;
@@ -134,9 +131,6 @@ void DirectSoundDriverLegacy::FillBuffer(BYTE *buff, DWORD len) {
 				readLoc = 0;
 		}
 	}
-	// Check into cnt != len...
-	if (cnt != len)
-		printf("%");
 
 	while (cnt != len) {
 		buff[cnt] = 0;
@@ -147,7 +141,6 @@ void DirectSoundDriverLegacy::FillBuffer(BYTE *buff, DWORD len) {
 
 DWORD WINAPI AudioThreadProc(DirectSoundDriverLegacy *ac) {
 	DWORD dwStatus;
-	DWORD last_play_pos = 0, bytesMoved = 0;
 	//LPDIRECTSOUNDBUFFER8  lpdsbuf = ac->lpdsbuf;
 //	LPDIRECTSOUND8        lpds = ac->lpds;
 
@@ -197,6 +190,7 @@ DWORD WINAPI AudioThreadProc(DirectSoundDriverLegacy *ac) {
 
 
 #ifdef STREAM_DMA
+			DWORD last_play_pos = 0, bytesMoved = 0;
 #ifdef SEH_SUPPORTED
 			__try // PJ64 likes to close objects before it shuts down the DLLs completely...
 			{

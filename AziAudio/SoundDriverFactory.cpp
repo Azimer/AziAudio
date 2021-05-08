@@ -17,9 +17,6 @@ SoundDriverFactory::FactoryDriversStruct SoundDriverFactory::FactoryDrivers[MAX_
 SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType DriverID)
 {
 	SoundDriverInterface *result = NULL;
-	SoundDriverType drivers[MAX_FACTORY_DRIVERS];
-	int index[MAX_FACTORY_DRIVERS];
-	bool sorted = false;
 
 	// Look for our driver
 	for (int x = 0; x < FactoryNextSlot; x++)
@@ -40,6 +37,10 @@ SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType Driv
 		I think for now I am happy where things are unless we see issues.  I have a lot of other things to do so it will stay disabled for now.
 	*/
 #if 0 
+	SoundDriverType drivers[MAX_FACTORY_DRIVERS];
+	int index[MAX_FACTORY_DRIVERS];
+	bool sorted = false;
+
 	if (result == NULL)
 	{
 		// *** Start failover ***
