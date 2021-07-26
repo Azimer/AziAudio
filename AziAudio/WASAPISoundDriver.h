@@ -20,7 +20,6 @@
 class WASAPISoundDriver :
 	public SoundDriver
 {
-	friend DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter);
 public:
 	WASAPISoundDriver();
 	~WASAPISoundDriver();
@@ -49,7 +48,7 @@ public:
 	static bool ValidateDriver();
 
 protected:
-	static DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter);
+	static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
 
 	//bool dllInitialized;
 	bool bInitialized;
