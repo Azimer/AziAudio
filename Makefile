@@ -36,7 +36,7 @@ WINDRES = windres
 COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wno-attributes
 CFLAGS = $(BASICOPTS) $(COMMON_FLAGS)
 CXXFLAGS = $(BASICOPTS) $(COMMON_FLAGS) $(CPPFLAGS)
-LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound
+LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound -lksuser
 
 # Define the target directories.
 BINDIR=bin
