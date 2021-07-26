@@ -80,8 +80,11 @@ $(BINDIR)/$(PLUGIN_FILE): $(BINDIR) $(OBJDIR) $(XA_OBJS) $(COMMON_OBJS)
 
 # Compile source files into .o files
 
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(XA_FLAGS) $(DS_FLAGS) $< -o $@
+
 %.o: %.cpp
-	$(CC) -c $(CXXFLAGS) $(CPPFLAGS) $(XA_FLAGS) $(DS_FLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $(XA_FLAGS) $(DS_FLAGS) $< -o $@
 
 %.o: %.rc
 	$(WINDRES) $(RESFLAGS) $< $@
