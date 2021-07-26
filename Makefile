@@ -70,6 +70,7 @@ COMMON_OBJS =  \
 	$(SRCDIR)/XAudio2SoundDriverLegacy.o \
 	$(SRCDIR)/DirectSoundDriver.o \
 	$(SRCDIR)/DirectSoundDriverLegacy.o \
+	$(SRCDIR)/WASAPISoundDriver.o \
 	$(SRCDIR)/NoSoundDriver.o \
 	$(SRCDIR)/HLEMain.o \
 	$(SRCDIR)/main.o \
