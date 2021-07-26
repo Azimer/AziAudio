@@ -33,8 +33,9 @@ endif
 CC = gcc
 CXX = g++
 WINDRES = windres
-CFLAGS = $(BASICOPTS) -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party"
-CXXFLAGS = $(BASICOPTS) -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party"
+COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wno-attributes
+CFLAGS = $(BASICOPTS) $(COMMON_FLAGS)
+CXXFLAGS = $(BASICOPTS) $(COMMON_FLAGS) $(CPPFLAGS)
 LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound
 
 # Define the target directories.
@@ -60,7 +61,6 @@ COMMON_OBJS =  \
 	$(SRCDIR)/Mupen64plusHLE/Mupen64Support.o \
 	$(SRCDIR)/Mupen64plusHLE/memory.o \
 	$(SRCDIR)/Mupen64plusHLE/audio.o \
-	$(SRCDIR)/resource.o \
 	$(SRCDIR)/SoundDriverFactory.o \
 	$(SRCDIR)/SoundDriverInterface.o \
 	$(SRCDIR)/SoundDriver.o \
@@ -72,7 +72,8 @@ COMMON_OBJS =  \
 	$(SRCDIR)/DirectSoundDriverLegacy.o \
 	$(SRCDIR)/NoSoundDriver.o \
 	$(SRCDIR)/HLEMain.o \
-	$(SRCDIR)/main.o
+	$(SRCDIR)/main.o \
+	$(SRCDIR)/resource.o
 
 # Link or archive
 $(BINDIR)/$(PLUGIN_FILE): $(BINDIR) $(OBJDIR) $(XA_OBJS) $(COMMON_OBJS)
@@ -81,10 +82,10 @@ $(BINDIR)/$(PLUGIN_FILE): $(BINDIR) $(OBJDIR) $(XA_OBJS) $(COMMON_OBJS)
 # Compile source files into .o files
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(XA_FLAGS) $(DS_FLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $(XA_FLAGS) $(DS_FLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 %.o: %.rc
 	$(WINDRES) $(RESFLAGS) $< $@
