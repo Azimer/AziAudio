@@ -33,7 +33,7 @@ public:
 	~SoundDriverFactory() {};
 
 	static SoundDriverInterface* CreateSoundDriver(SoundDriverType DriverID);
-	static bool RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, char *Description, int Priority);
+	static bool RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, const char *Description, int Priority);
 	static SoundDriverType DefaultDriver();
 	static int EnumDrivers(SoundDriverType *drivers, int max_entries);
 	static const char* GetDriverDescription(SoundDriverType driver);

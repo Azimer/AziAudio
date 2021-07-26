@@ -425,7 +425,7 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 		}
 		break;
 	case WM_HSCROLL:
-		if (lParam != NULL)
+		if (lParam != 0)
 		{
 			char textPos[20];
 			unsigned long dwPosition;

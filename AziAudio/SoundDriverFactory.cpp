@@ -88,7 +88,7 @@ SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType Driv
 // Currently priority highest to lowest:  XA2L(11), XA2(10), DS8(6), DS8L(5), NoAudio(0)
 // Priority setting can be changed per build...  for example... XBox should be DS8 or DS8L since it doesn't support XA2.
 // However, since these two implementations shouldn't be included in the project, DS8 and DS8L will be default.
-bool SoundDriverFactory::RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, char *Description, int Priority)
+bool SoundDriverFactory::RegisterSoundDriver(SoundDriverType DriverType, SoundDriverCreationFunction CreateFunction, const char *Description, int Priority)
 {
 	if (FactoryNextSlot < MAX_FACTORY_DRIVERS)
 	{

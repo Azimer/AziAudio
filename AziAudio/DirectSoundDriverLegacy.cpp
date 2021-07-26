@@ -725,7 +725,7 @@ void DirectSoundDriverLegacy::StartAudio() {
 	}
 	else
 	{
-		this->handleAudioThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)AudioThreadProc, this, NULL, &this->dwAudioThreadId);
+		this->handleAudioThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AudioThreadProc, this, 0, &this->dwAudioThreadId);
 	}
 	//test.BeginWaveOut("D:\\test.wav", 2, 16, SampleRate);
 	if (lpdsbuf != NULL)
