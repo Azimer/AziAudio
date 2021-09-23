@@ -335,7 +335,7 @@ void RedirectIOToConsole() {
 	
 #endif
 }
-
+#endif
 
 #ifdef _WIN32
 /*
@@ -354,6 +354,4 @@ void SetTimerResolution(void)
 		NtSetTimerResolution(10000, TRUE, &CurrentResolution);
 	}
 }
-#endif
-
 #endif

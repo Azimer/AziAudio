@@ -10,6 +10,7 @@
 ****************************************************************************/
 
 #pragma once
+#include <cstdio>
 #include <Windows.h>
 
 typedef struct 
