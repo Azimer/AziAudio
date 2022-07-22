@@ -1,0 +1,2 @@
+This project uses [RapidJSON](https://github.com/Tencent/rapidjson) Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip.
+Last updated from commit [17aa824c](https://github.com/Tencent/rapidjson/commit/17aa824c928ea111e9b12a61e06d98335ce98f15) on 2021-05-20.

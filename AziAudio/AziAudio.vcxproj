@@ -39,7 +39,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Party\directx\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Party\directx\include;$(SolutionDir)3rd Party\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(SolutionDir)3rd Party\directx\lib\x86</AdditionalLibraryDirectories>
@@ -53,6 +53,7 @@
     <ClInclude Include="AudioSpec.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="Configuration.h" />
+    <ClInclude Include="ConfigurationParser.h" />
     <ClInclude Include="DirectSoundDriver.h" />
     <ClInclude Include="DirectSoundDriverLegacy.h" />
     <ClInclude Include="Mupen64plusHLE\arithmetics.h" />
@@ -89,6 +90,7 @@
     <ClCompile Include="ABI_MixerInterleave.cpp" />
     <ClCompile Include="ABI_Resample.cpp" />
     <ClCompile Include="Configuration.cpp" />
+    <ClCompile Include="ConfigurationParser.cpp" />
     <ClCompile Include="DirectSoundDriver.cpp" />
     <ClCompile Include="DirectSoundDriverLegacy.cpp" />
     <ClCompile Include="HLEMain.cpp" />

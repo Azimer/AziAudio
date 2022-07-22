@@ -2,7 +2,7 @@
 *                                                                           *
 * Azimer's HLE Audio Plugin for Project64 Compatible N64 Emulators          *
 * http://www.apollo64.com/                                                  *
-* Copyright (C) 2000-2019 Azimer. All rights reserved.                      *
+* Copyright (C) 2000-2021 Azimer. All rights reserved.                      *
 *                                                                           *
 * License:                                                                  *
 *                                                                           *
