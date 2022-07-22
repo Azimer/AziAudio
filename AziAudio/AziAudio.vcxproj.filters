@@ -108,6 +108,9 @@
     <ClInclude Include="Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConfigurationParser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectSoundDriver.cpp">
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="WaveOutSoundDriver.cpp">
       <Filter>Source Files\Sound Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationParser.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
