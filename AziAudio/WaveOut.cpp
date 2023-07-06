@@ -9,6 +9,8 @@
 *                                                                           *
 ****************************************************************************/
 
+#include "common.h"
+#if defined(ENABLE_BACKEND_WAVEOUT)
 #include <memory.h>
 #include <stdio.h>
 #include "WaveOut.h"	
@@ -61,3 +63,4 @@ void WaveOut::EndWaveOut()
 	fclose(waveoutput);
 	waveoutput = NULL;
 }
+#endif

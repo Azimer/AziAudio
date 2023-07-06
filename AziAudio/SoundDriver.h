@@ -14,7 +14,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #else
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
 #include <pthread.h>
 #include <unistd.h>
 #endif
@@ -91,7 +91,7 @@ protected:
 #ifdef _WIN32
 		m_hMutex = NULL;
 #else
-		m_Mutex = NULL;
+		m_Mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 	}
 };

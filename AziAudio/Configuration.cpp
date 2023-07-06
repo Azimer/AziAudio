@@ -110,16 +110,16 @@ void Configuration::SaveSettings()
 	file = fopen(ConfigFile, "wb");
 	if (file != NULL)
 	{
-		fprintf(file, "%c", getSyncAudio());
-		fprintf(file, "%c", getForceSync());
-		fprintf(file, "%c", getAIEmulation());
-		fprintf(file, "%c", getVolume());
-		fprintf(file, "%c%c", (getDriver() >> 8) & 0xFF, getDriver() & 0xFF);
-		fprintf(file, "%c", getBufferLevel());
-		fprintf(file, "%c", getBufferFPS());
-		fprintf(file, "%c", getBackendFPS());
-		fprintf(file, "%c", getDisallowSleepXA2());
-		fprintf(file, "%c", getDisallowSleepDS8());
+		fprintf(file, "%c", (unsigned char)getSyncAudio());
+		fprintf(file, "%c", (unsigned char)getForceSync());
+		fprintf(file, "%c", (unsigned char)getAIEmulation());
+		fprintf(file, "%c", (unsigned char)getVolume());
+		fprintf(file, "%c%c", (unsigned char)((getDriver() >> 8) & 0xFF), (unsigned char)(getDriver() & 0xFF));
+		fprintf(file, "%c", (unsigned char)getBufferLevel());
+		fprintf(file, "%c", (unsigned char)getBufferFPS());
+		fprintf(file, "%c", (unsigned char)getBackendFPS());
+		fprintf(file, "%c", (unsigned char)getDisallowSleepXA2());
+		fprintf(file, "%c", (unsigned char)getDisallowSleepDS8());
 		fclose(file);
 	}
 }
@@ -129,8 +129,10 @@ void Configuration::SaveSettings()
 */
 void Configuration::LoadDefaults()
 {
+#if defined(_WIN32)
 	EnumDeviceCount = 0;
 	EnumDriverCount = 0;
+#endif
 	safe_strcpy(Configuration::configAudioLogFolder, 499, "D:\\");
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS) && !defined(_XBOX)
 	strcpy_s(Configuration::configAudioLogFolder, 500, "D:\\");
@@ -148,7 +150,9 @@ void Configuration::LoadDefaults()
 	}
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
+#if defined(_WIN32)
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
+#endif
 	setDriver(SoundDriverFactory::DefaultDriver());	
 	setAIEmulation(true);
 	setSyncAudio(true);

@@ -22,8 +22,10 @@
 #include <stdio.h> // needed for configuration
 
 #ifdef USE_PRINTF
+	#ifdef _WIN32
 	#include <io.h>
 	#include <fcntl.h>
+	#endif
 	#include <ios>
 	using namespace std;
 #endif
@@ -295,9 +297,9 @@ int safe_strcpy(char* dst, size_t limit, const char* src)
 }
 
 #ifdef USE_PRINTF
-static const WORD MAX_CONSOLE_LINES = 500;
+static const unsigned short MAX_CONSOLE_LINES = 500;
 void RedirectIOToConsole() {
-#if !defined(_XBOX)
+#if !defined(_XBOX) && defined(_WIN32)
 	//int hConHandle;
 	//long lStdHandle;
 	//CONSOLE_SCREEN_BUFFER_INFO coninfo;

@@ -11,26 +11,28 @@
 
 #pragma once
 #include <cstdio>
-#include <Windows.h>
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 
 typedef struct 
 {
 	// RIFF Header
 	char ChunkID[4]; // "RIFF"
-	DWORD ChunkSize; // FileSize - 8
+	unsigned long ChunkSize; // FileSize - 8
 	char format[4]; // "WAVE"
 	// fmt Header
 	char Subchunk1ID[4]; // "fmt "
-	DWORD Subchunk1Size; // 16 for PCM
-	WORD AudioFormat; // PCM=1
-	WORD NumChannels; // Mono=1, Stereo=2
-	DWORD SampleRate; // 8000, 44100, etc.
-	DWORD ByteRate; // SampleRate*NumChannels*BitsPerSample/8
-	WORD BlockAlign; // NumChannels * BitsPerSample/8
-	WORD BitsPerSample; // 8bits = 8, 16 bits = 16
+	unsigned long Subchunk1Size; // 16 for PCM
+	unsigned short AudioFormat; // PCM=1
+	unsigned short NumChannels; // Mono=1, Stereo=2
+	unsigned long SampleRate; // 8000, 44100, etc.
+	unsigned long ByteRate; // SampleRate*NumChannels*BitsPerSample/8
+	unsigned short BlockAlign; // NumChannels * BitsPerSample/8
+	unsigned short BitsPerSample; // 8bits = 8, 16 bits = 16
 	// Data Header
 	char Subchunk2ID[4]; // "data"
-	DWORD Subchunk2Size; // NumSamples * NumChannels * BitsPerSample/8
+	unsigned long Subchunk2Size; // NumSamples * NumChannels * BitsPerSample/8
 
 	// Everything after is Data
 
@@ -41,10 +43,10 @@ class WaveOut
 protected:
 	WaveHeader header;
 	FILE *waveoutput;
-	DWORD datasize;
+	unsigned long datasize;
 public:
 	WaveOut();
-	void BeginWaveOut(char *filename, WORD channels, WORD bitsPerSample, DWORD sampleRate);
+	void BeginWaveOut(char *filename, unsigned short channels, unsigned short bitsPerSample, unsigned long sampleRate);
 	void EndWaveOut();
-	void WriteData (unsigned char*data, DWORD size);
+	void WriteData (unsigned char*data, unsigned long size);
 };
