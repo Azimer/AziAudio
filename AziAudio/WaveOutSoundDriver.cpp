@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include "SoundDriverFactory.h"
 
-#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "winmm.lib") // TODO: Move this to the project / propsheets
 
 WaveOutSoundDriver* WaveOutSoundDriver::m_Instance;
 

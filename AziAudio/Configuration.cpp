@@ -43,8 +43,8 @@ SoundDriverType Configuration::configDriver;
 //static int SelectedDSound;
 // DirectSound selection
 #ifdef _WIN32
-static GUID EnumDeviceGUID[20];
-static char EnumDeviceName[20][100];
+//static GUID EnumDeviceGUID[20];
+//static char EnumDeviceName[20][100];
 static int EnumDeviceCount;
 static SoundDriverType EnumDriverType[10];
 static int EnumDriverCount;
@@ -169,7 +169,7 @@ void Configuration::LoadDefaults()
 	LoadSettings();
 }
 #ifdef _WIN32
-#pragma comment(lib, "comctl32.lib")
+#pragma comment(lib, "comctl32.lib") // TODO: Move this to the project / propsheets
 extern HINSTANCE hInstance;
 void Configuration::ConfigDialog(HWND hParent)
 {
@@ -387,11 +387,11 @@ void Configuration::ResetAdvancedPage(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_SETCHECK, tmp.configDisallowSleepDS8 ? BST_CHECKED : BST_UNCHECKED, 0);
 	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_SETCHECK, tmp.configDisallowSleepXA2 ? BST_CHECKED : BST_UNCHECKED, 0);
 	char textPos[20];
-	sprintf(textPos, "%i", tmp.configBufferLevel);
+	sprintf(textPos, "%li", tmp.configBufferLevel);
 	SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
-	sprintf(textPos, "%i ms", 1000 / tmp.configBackendFPS);
+	sprintf(textPos, "%li ms", 1000 / tmp.configBackendFPS);
 	SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
-	sprintf(textPos, "%i ms", 1000 / tmp.configBufferFPS);
+	sprintf(textPos, "%li ms", 1000 / tmp.configBufferFPS);
 	SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 }
 
@@ -437,17 +437,17 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 			{
 				case IDC_BUFFERS:					
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i", dwPosition);
+					sprintf(textPos, "%li", dwPosition);
 					SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BACKFPS:
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i ms", (DWORD)(1000/(dwPosition*15)));
+					sprintf(textPos, "%li ms", (DWORD)(1000/(dwPosition*15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BUFFERFPS:
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i ms", (DWORD)(1000 / (dwPosition * 15)));
+					sprintf(textPos, "%li ms", (DWORD)(1000 / (dwPosition * 15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 					break;
 			}

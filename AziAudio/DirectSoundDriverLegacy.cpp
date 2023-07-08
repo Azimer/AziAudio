@@ -24,12 +24,12 @@ bool DirectSoundDriverLegacy::ClassRegistered = DirectSoundDriverLegacy::Validat
 // TODO: Clean this up a bit...
 
 static DWORD sLOCK_SIZE;
-static DWORD last_pos = 0, write_pos = 0, play_pos = 0, temp = 0, next_pos = 0;
+static DWORD last_pos = 0, write_pos = 0, play_pos = 0, next_pos = 0; // temp = 0, 
 static DWORD last_play = 0;
-static DWORD last_write = ~0u;
+//static DWORD last_write = ~0u;
 static LPVOID lpvPtr1, lpvPtr2;
 static DWORD dwBytes1, dwBytes2;
-static int AudioInterruptTime = -1;
+//static int AudioInterruptTime = -1;
 static DWORD lastLength = 0;
 static DWORD DMALen[3] = { 0, 0, 0 };
 static BYTE *DMAData[3] = { NULL, NULL, NULL };
@@ -37,8 +37,8 @@ static BYTE *DMAData[3] = { NULL, NULL, NULL };
 static LPDIRECTSOUNDBUFFER lpdsbuff = NULL;
 static LPDIRECTSOUNDBUFFER lpdsb = NULL;
 
-static DWORD buffsize = 0;
-static DWORD laststatus = 0;
+//static DWORD buffsize = 0;
+//static DWORD laststatus = 0;
 static DWORD interruptcnt = 0;
 
 //WaveOut test;
@@ -481,8 +481,8 @@ void DirectSoundDriverLegacy::DeInitialize() {
 	}
 
 	lpdsbuf = NULL; lpds = NULL; audioIsDone = false; hMutex = NULL; audioIsPlaying = FALSE; readLoc = writeLoc = remainingBytes = 0;
-	DMALen[0] = DMALen[0] = 0;
-	DMAData[0] = DMAData[0] = NULL;
+	DMALen[0] = DMALen[1] = 0;
+	DMAData[0] = DMAData[1] = NULL;
 	DEBUG_OUTPUT("DS8L: DeInitialize() complete\n");
 }
 
@@ -502,7 +502,7 @@ void DirectSoundDriverLegacy::SetFrequency(u32 Frequency2) {
 	SampleRate = Frequency;
 	SegmentSize = 0; // Trash it... we need to redo the Frequency anyway...
 	SetSegmentSize(LOCK_SIZE);
-	printf("DS8L: Frequency: %i - SegmentSize: %i\n", Frequency, SegmentSize);
+	printf("DS8L: Frequency: %li - SegmentSize: %li\n", Frequency, SegmentSize);
 	lastLength = 0;
 	writeLoc = 0x0000;
 	readLoc = 0x0000;
@@ -617,9 +617,9 @@ u32 DirectSoundDriverLegacy::AddBuffer(u8 *start, u32 length) {
 	if (max > MAXBUFFER) {
 		if (lastLength != length) {
 			lastLength = length;
-			DEBUG_OUTPUT("\nlast: %i, len: %i, MB: %i, SEG: %i\n", lastLength, length, MAXBUFFER, LOCK_SIZE);
+			DEBUG_OUTPUT("\nlast: %li, len: %i, MB: %i, SEG: %li\n", lastLength, length, MAXBUFFER, LOCK_SIZE);
 		}
-		DEBUG_OUTPUT("\nlast: %i, len: %i, MB: %i, SEG: %i\n", lastLength, length, MAXBUFFER, LOCK_SIZE);
+		DEBUG_OUTPUT("\nlast: %li, len: %i, MB: %i, SEG: %li\n", lastLength, length, MAXBUFFER, LOCK_SIZE);
 		DEBUG_OUTPUT(",");
 	}
 	if (Configuration::getSyncAudio() && (max > MAXBUFFER)) {

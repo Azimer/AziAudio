@@ -28,7 +28,7 @@ static bool audioIsPlaying = false;
 static bool canPlay = false;
 
 static u8 bufferData[10][44100 * 4];
-static u8* bufferLocation[10];
+//static u8* bufferLocation[10];
 static int bufferLength[10];
 static int writeBuffer = 0;
 static int readBuffer = 0;

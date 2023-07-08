@@ -21,7 +21,7 @@ endif
 ifneq ($(BUILD_DEBUG),1)
 PLUGIN_FILE = AziAudio_m.dll
 RESFLAGS =
-BASICOPTS = -O2
+BASICOPTS = -O3
 BUILD_TYPE = Release
 else
 PLUGIN_FILE = AziAudio_md.dll
@@ -30,10 +30,11 @@ BASICOPTS = -g -D_DEBUG
 BUILD_TYPE = Debug
 endif
 
-CC = gcc
-CXX = g++
-WINDRES = windres
-COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wno-attributes
+BUILD_PREFIX = i686-w64-mingw32-
+CC = $(BUILD_PREFIX)gcc
+CXX = $(BUILD_PREFIX)g++
+WINDRES = $(BUILD_PREFIX)windres
+COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wall -Wno-attributes -Wno-unknown-pragmas
 CFLAGS = $(BASICOPTS) $(COMMON_FLAGS)
 CXXFLAGS = $(BASICOPTS) $(COMMON_FLAGS) $(CPPFLAGS)
 LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound -lksuser

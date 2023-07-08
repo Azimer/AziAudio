@@ -218,7 +218,7 @@ DWORD WINAPI WASAPISoundDriver::AudioThreadProc(LPVOID lpParameter)
 
 	// Calculate the actual duration of the allocated buffer.	
 	hnsActualDuration = ((REFTIMES_PER_SEC * bufferFrameCount) / AudioFormat.Format.nSamplesPerSec);
-	DEBUG_OUTPUT("Requested Duration: %i ms\n", (1000 / Configuration::getBackendFPS()));
+	DEBUG_OUTPUT("Requested Duration: %li ms\n", (1000 / Configuration::getBackendFPS()));
 	DEBUG_OUTPUT("Actual Duration: %i ms\n", (int)(hnsActualDuration / REFTIMES_PER_MILLISEC));
 	DEBUG_OUTPUT("Buffer Frame Count: %i\n", bufferFrameCount);
 	// Let's play some shit...
@@ -324,8 +324,8 @@ u32 WASAPISoundDriver::LoadAiBufferResample(u8 *start, u32 frames, float ratio)
 		{
 			outp[0] = (Linp0 + accum * (Cinp0 - Linp0)) * gain;
 			outp[1] = (Linp1 + accum * (Cinp1 - Linp1)) * gain;
-			if (outp[0] > 1.0) outp[0] = 1.0; if (outp[0] < -1.0) outp[0] = -1.0;
-			if (outp[1] > 1.0) outp[1] = 1.0; if (outp[1] < -1.0) outp[1] = -1.0;
+			if (outp[0] > 1.0) outp[0] = 1.0; else if (outp[0] < -1.0) outp[0] = -1.0;
+			if (outp[1] > 1.0) outp[1] = 1.0; else if (outp[1] < -1.0) outp[1] = -1.0;
 			accum += ratio;
 			while (accum >= 1.0)
 			{

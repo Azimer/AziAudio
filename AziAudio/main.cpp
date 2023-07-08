@@ -25,8 +25,10 @@
 	#ifdef _WIN32
 	#include <io.h>
 	#include <fcntl.h>
-	#endif
+	#undef __in
+	#undef __out
 	#include <ios>
+	#endif
 	using namespace std;
 #endif
 
@@ -259,7 +261,7 @@ EXPORT u32 CALL AiReadLength(void) {
 }
 
 EXPORT void CALL AiUpdate(Boolean Wait) {
-	static int intCount = 0;
+	//static int intCount = 0;
 
 	if (snd == NULL)
 	{

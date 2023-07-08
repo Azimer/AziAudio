@@ -32,7 +32,7 @@ static int writeBuffer = 0;
 static int readBuffer = 0;
 static int filledBuffers;
 static int bufferBytes;
-static int lastLength = 1;
+//static int lastLength = 1;
 
 static int cacheSize = 0;
 static int interrupts = 0;
