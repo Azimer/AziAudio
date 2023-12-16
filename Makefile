@@ -42,55 +42,69 @@ LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -l
 # Define the target directories.
 BINDIR=bin
 SRCDIR=AziAudio
+OBJDIR=$(BINDIR)/$(BUILD_TYPE)_$(BUILD_ARCH)
 
 all: $(BINDIR)/$(PLUGIN_FILE)
 
 COMMON_OBJS =  \
-	$(SRCDIR)/WaveOut.o \
-	$(SRCDIR)/ABI_Resample.o \
-	$(SRCDIR)/ABI_MixerInterleave.o \
-	$(SRCDIR)/ABI_Filters.o \
-	$(SRCDIR)/ABI_Envmixer.o \
-	$(SRCDIR)/ABI_Buffers.o \
-	$(SRCDIR)/ABI_Adpcm.o \
-	$(SRCDIR)/ABI3mp3.o \
-	$(SRCDIR)/ABI3.o \
-	$(SRCDIR)/ABI2.o \
-	$(SRCDIR)/ABI1.o \
-	$(SRCDIR)/Configuration.o \
-	$(SRCDIR)/Mupen64plusHLE/musyx.o \
-	$(SRCDIR)/Mupen64plusHLE/Mupen64Support.o \
-	$(SRCDIR)/Mupen64plusHLE/memory.o \
-	$(SRCDIR)/Mupen64plusHLE/audio.o \
-	$(SRCDIR)/SoundDriverFactory.o \
-	$(SRCDIR)/SoundDriverInterface.o \
-	$(SRCDIR)/SoundDriver.o \
-	$(SRCDIR)/SoundDriverLegacy.o \
-	$(SRCDIR)/WaveOutSoundDriver.o \
-	$(SRCDIR)/XAudio2SoundDriver.o \
-	$(SRCDIR)/XAudio2SoundDriverLegacy.o \
-	$(SRCDIR)/DirectSoundDriver.o \
-	$(SRCDIR)/DirectSoundDriverLegacy.o \
-	$(SRCDIR)/WASAPISoundDriver.o \
-	$(SRCDIR)/NoSoundDriver.o \
-	$(SRCDIR)/HLEMain.o \
-	$(SRCDIR)/main.o \
-	$(SRCDIR)/resource.o
+	$(OBJDIR)/WaveOut.o \
+	$(OBJDIR)/ABI_Resample.o \
+	$(OBJDIR)/ABI_MixerInterleave.o \
+	$(OBJDIR)/ABI_Filters.o \
+	$(OBJDIR)/ABI_Envmixer.o \
+	$(OBJDIR)/ABI_Buffers.o \
+	$(OBJDIR)/ABI_Adpcm.o \
+	$(OBJDIR)/ABI3mp3.o \
+	$(OBJDIR)/ABI3.o \
+	$(OBJDIR)/ABI2.o \
+	$(OBJDIR)/ABI1.o \
+	$(OBJDIR)/Configuration.o \
+	$(OBJDIR)/Mupen64plusHLE/musyx.o \
+	$(OBJDIR)/Mupen64plusHLE/Mupen64Support.o \
+	$(OBJDIR)/Mupen64plusHLE/memory.o \
+	$(OBJDIR)/Mupen64plusHLE/audio.o \
+	$(OBJDIR)/SoundDriverFactory.o \
+	$(OBJDIR)/SoundDriverInterface.o \
+	$(OBJDIR)/SoundDriver.o \
+	$(OBJDIR)/SoundDriverLegacy.o \
+	$(OBJDIR)/WaveOutSoundDriver.o \
+	$(OBJDIR)/XAudio2SoundDriver.o \
+	$(OBJDIR)/XAudio2SoundDriverLegacy.o \
+	$(OBJDIR)/DirectSoundDriver.o \
+	$(OBJDIR)/DirectSoundDriverLegacy.o \
+	$(OBJDIR)/WASAPISoundDriver.o \
+	$(OBJDIR)/NoSoundDriver.o \
+	$(OBJDIR)/HLEMain.o \
+	$(OBJDIR)/main.o \
+	$(OBJDIR)/resource.o
 
 # Link or archive
-$(BINDIR)/$(PLUGIN_FILE): $(BINDIR) $(OBJDIR) $(XA_OBJS) $(COMMON_OBJS)
+$(BINDIR)/$(PLUGIN_FILE): ALL_DIRS $(XA_OBJS) $(COMMON_OBJS)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(COMMON_OBJS) $(LDFLAGS)
 
 # Compile source files into .o files
 
-%.o: %.c
+$(OBJDIR)/Mupen64plusHLE/%.o: AziAudio/Mupen64plusHLE/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-%.o: %.cpp
+$(OBJDIR)/%.o: AziAudio/%.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OBJDIR)/%.o: AziAudio/%.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-%.o: %.rc
+$(OBJDIR)/%.o: AziAudio/%.rc
 	$(WINDRES) $(RESFLAGS) $< $@
+
+.PHONY: ALL_DIRS
+
+ALL_DIRS: $(BINDIR) $(OBJDIR) $(OBJDIR)/Mupen64plusHLE 
+
+$(OBJDIR)/Mupen64plusHLE:
+	mkdir -p $@
+
+$(OBJDIR):
+	mkdir -p $@
 
 $(BINDIR):
 	mkdir -p $@
