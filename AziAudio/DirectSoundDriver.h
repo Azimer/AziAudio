@@ -42,6 +42,7 @@ protected:
 	DWORD dwFreqTarget; // Frequency of the Nintendo64 Game Audio
 	void(*CallBack)(DWORD);
 	BOOL audioIsPlaying;
+	bool threadRunning;
 	HANDLE handleAudioThread;
 	DWORD  dwAudioThreadId;
 	HANDLE hMutex;

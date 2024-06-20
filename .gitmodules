@@ -1,0 +1,3 @@
+[submodule "3rd Party/simpleini"]
+	path = 3rd Party/simpleini
+	url = https://github.com/Azimer/simpleini.git
