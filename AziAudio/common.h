@@ -12,7 +12,7 @@
 //************ Configuration Section ************** (to be moved to compile time defines)
 
 // Configure the plugin to have a console window for informational output -- should be used for debugging only
-#define USE_PRINTF
+//#define USE_PRINTF
 
 #ifdef _WIN32
 #define ENABLE_BACKEND_DIRECTSOUND8_LEGACY
@@ -36,6 +36,7 @@
 #elif defined(_WIN32)
 #include <windows.h>
 #include <commctrl.h>
+extern OSVERSIONINFOEX OSInfo;
 #endif
 
 #ifdef USE_PRINTF
@@ -119,7 +120,7 @@ extern rSettings RegSettings;
 #endif
 
 #define PLUGIN_RELEASE " v0.70"
-#define PLUGIN_BUILD " WIP 10" \
+#define PLUGIN_BUILD " WIP 11" \
 	   PLUGIN_DEBUG 
 
 #define PLUGIN_VERSION \

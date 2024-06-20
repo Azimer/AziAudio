@@ -40,9 +40,10 @@ static VoiceCallback voiceCallback;
 
 bool XAudio2SoundDriver::ValidateDriver()
 {
+	return true;
 	bool retVal = false;
 	/* Validate an XAudio2 2.7 object will initialize */
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitialize(NULL);
 	const GUID CLSID_XAudio2_Test = { 0x5a508685, 0xa254, 0x4fba, 0x9b, 0x82, 0x9a, 0x24, 0xb0, 0x03, 0x06, 0xaf };
 	const GUID IID_IXAudio2_Test = { 0x8bcf1f58, 0x9fe7, 0x4583, 0x8a, 0xc6, 0xe2, 0xad, 0xc4, 0x65, 0xc8, 0xbb };
 	IUnknown* obj;
@@ -66,7 +67,7 @@ XAudio2SoundDriver::XAudio2SoundDriver()
 	dllInitialized = false;
 	bStopAudioThread = false;
 	hAudioThread = NULL;
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitialize(NULL);
 }
 
 
@@ -115,14 +116,14 @@ BOOL XAudio2SoundDriver::Setup()
 	hMutex = CreateMutex(NULL, FALSE, NULL);
 	if (FAILED(XAudio2Create(&g_engine)))
 	{
-		CoUninitialize();
+		//CoUninitialize();
 		return -1;
 	}
 
 	if (FAILED(g_engine->CreateMasteringVoice(&g_master)))
 	{
 		g_engine->Release();
-		CoUninitialize();
+		//CoUninitialize();
 		return -2;
 	}
 	canPlay = true;
@@ -144,7 +145,7 @@ BOOL XAudio2SoundDriver::Setup()
 	if (FAILED(g_engine->CreateSourceVoice(&g_source, &wfm, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &voiceCallback, NULL, NULL)))
 	{
 		g_engine->Release();
-		CoUninitialize();
+		//CoUninitialize();
 		return -3;
 	}
 

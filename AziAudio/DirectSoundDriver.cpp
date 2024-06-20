@@ -44,12 +44,13 @@ static LPDIRECTSOUNDBUFFER lpdsb = NULL;
 
 bool DirectSoundDriver::ValidateDriver()
 {
+	return true;
 	bool retVal = false;
 	const GUID CLSID_DirectSound8_Test = { 0x3901cc3f, 0x84b5, 0x4fa4, 0xba, 0x35, 0xaa, 0x81, 0x72, 0xb8, 0xa0, 0x9b };
 	const GUID IID_IDirectSound8_Test = { 0xC50A7E93, 0xF395, 0x4834, 0x9E, 0xF6, 0x7F, 0xA9, 0x9D, 0xE5, 0x09, 0x66 };
 
 	/* Validate an DirectSound8 object will initialize */
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitialize(NULL);
 	IUnknown* obj;
 	HRESULT hr = CoCreateInstance(CLSID_DirectSound8_Test,
 		NULL, CLSCTX_INPROC_SERVER, IID_IDirectSound8_Test, (void**)&obj);
@@ -67,11 +68,14 @@ DWORD WINAPI AudioThreadProc(DirectSoundDriver *ac) {
 	//DWORD last_play_pos = 0, bytesMoved = 0;
 	//LPDIRECTSOUNDBUFFER8  lpdsbuf = ac->lpdsbuf;
 //	LPDIRECTSOUND8        lpds = ac->lpds;
-
+	ac->threadRunning = true;
 	lpdsbuff = ac->lpdsbuf;
 
 	while (lpdsbuff == NULL)
-		Sleep(10);
+	{
+		Sleep(1);
+		if (ac->audioIsDone == true) goto _exit_;
+	}
 	DEBUG_OUTPUT("DS8: Audio Thread Started...\n");
 	IDirectSoundBuffer_GetStatus(lpdsbuff, &dwStatus);
 	if ((dwStatus & DSBSTATUS_PLAYING) == 0) {
@@ -239,6 +243,7 @@ _exit_:
 	DEBUG_OUTPUT("DS8: Audio Thread Terminated...\n");
 	ReleaseMutex(ac->hMutex);
 	//ac->handleAudioThread = NULL;
+	ac->threadRunning = false;
 	ExitThread(0);
 //	return 0;
 }
@@ -298,6 +303,7 @@ BOOL DirectSoundDriver::Initialize() {
 	WAVEFORMATEX        wfm;
 	HRESULT             hr;
 
+	this->threadRunning = false;
 	DeInitialize(); // Release just in case...
 	SampleRate = 0; // -- Disabled due to reset bug 
 
@@ -437,8 +443,18 @@ void DirectSoundDriver::StopAudio() {
 	}
 	audioIsPlaying = FALSE;
 	audioIsDone = true;
-	Sleep(100);
-	TerminateThread(this->handleAudioThread, 0);
+	if (this->handleAudioThread != NULL)
+	{
+		int sleepCnt = 0;
+		while (this->threadRunning == true && sleepCnt++ < 100)
+			Sleep(1);
+		if (this->threadRunning == true)
+		{
+			DEBUG_OUTPUT("DS8: Unsafe Thread Termination\n");
+			TerminateThread(this->handleAudioThread, 0);
+			this->threadRunning = false;
+		}
+	}
 	this->handleAudioThread = NULL;
 	DEBUG_OUTPUT("DS8: StopAudio() complete\n");
 }

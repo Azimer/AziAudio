@@ -8,6 +8,7 @@
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
 *                                                                           *
 ****************************************************************************/
+#include "../3rd Party/simpleini/SimpleIni.h" // Must be loaded before windows.h
 #include "Configuration.h"
 #include "common.h"
 
@@ -15,6 +16,7 @@
 #include "resource.h"
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
+
 
 
 #ifdef _WIN32
@@ -25,7 +27,8 @@ extern HINSTANCE hInstance; // DLL's HINSTANCE
 extern SoundDriverInterface *snd;
 
 // ************* Member Variables *************
-
+t_romheader* Configuration::Header;
+bool Configuration::RomRunning = false;
 unsigned long Configuration::configVolume;
 char Configuration::configAudioLogFolder[MAX_FOLDER_LENGTH];
 /* TODO: Enable device selection...  is this even possible across multiple API implementations? */
@@ -45,83 +48,155 @@ SoundDriverType Configuration::configDriver;
 #ifdef _WIN32
 //static GUID EnumDeviceGUID[20];
 //static char EnumDeviceName[20][100];
-static int EnumDeviceCount;
+//static int EnumDeviceCount;
 static SoundDriverType EnumDriverType[10];
 static int EnumDriverCount;
 #endif
 
-const char *ConfigFile = "Config/AziCfg.bin";
+//const char *ConfigFile = "Config/AziCfg.bin";
 
 // Dialog Procedures
 #if defined(_WIN32)
-//BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
+//bool CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
 INT_PTR CALLBACK ConfigProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
+bool Configuration::config_load()
+{
+	//LoadDefaults();
+	setResTimer(false);
+
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { 
+		LoadDefaults(); 
+		config_save(); 
+		return false; 
+	}
+	
+	setSyncAudio(ini.GetBoolValue(SECTION_GENERAL, KEY_SYNCAUDIO, false));
+	setForceSync(ini.GetBoolValue(SECTION_GENERAL, KEY_FORCESYNC, false));
+	setAIEmulation(ini.GetBoolValue(SECTION_GENERAL, KEY_AIEMULATION, false));
+	setVolume(ini.GetLongValue(SECTION_GENERAL, KEY_VOLUME, 0));
+	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, (long)SoundDriverFactory::DefaultDriver()));
+	setBufferLevel(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERLEVEL, 3));
+	setBufferFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERFPS, 45));
+	setBackendFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BACKENDFPS, 90));
+	setDisallowSleepXA2(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, false));
+	setDisallowSleepDS8(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, false));
+	return true;
+}
+
+bool Configuration::config_load_rom()
+{
+	char CRC_Entry[128];
+
+	sprintf(CRC_Entry, "%08X-%08X-C:%02X", Header->crc1, Header->crc2, Header->countrycode);
+
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { return false; }
+	
+	setSyncAudio(ini.GetBoolValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio()));
+	setForceSync(ini.GetBoolValue(CRC_Entry, KEY_FORCESYNC, getForceSync()));
+	setAIEmulation(ini.GetBoolValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation()));
+	setVolume(ini.GetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume()));
+	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver()));
+	setBufferLevel(ini.GetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel()));
+	setBufferFPS(ini.GetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS()));
+	setBackendFPS(ini.GetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS()));
+	setDisallowSleepXA2(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2()));
+	setDisallowSleepDS8(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8()));
+	return true;
+}
+
 void Configuration::LoadSettings()
 {
-	size_t file_size = 0;
-	unsigned char azicfg[256];
-	FILE *file;
-	file = fopen(ConfigFile, "rb");
-	memset(azicfg, 0, sizeof(azicfg));
-	if (file == NULL)
-	{
-		SaveSettings(); // Saves the config file with defaults
-		return;
-	}
-	else
-	{
-		for (file_size = 0; file_size < sizeof(azicfg); file_size++) {
-			const int character = fgetc(file);
-			if (character < 0 || character > 255)
-				break; /* hit EOF or a disk read error */
-			azicfg[file_size] = (unsigned char)(character);
-		}
-		if (fclose(file) != 0)
-			fputs("Failed to close config file stream.\n", stderr);
-	}
+	config_load();
 
-	setSyncAudio((azicfg[0] != 0x00) ? true : false);
-	setForceSync((azicfg[1] != 0x00) ? true : false);
-	setAIEmulation((azicfg[2] != 0x00) ? true : false);
-	setVolume((azicfg[3] > 100) ? 100 : azicfg[3]);
-	if (file_size > 4)
-	{
-		setDriver((SoundDriverType)(azicfg[4] << 8 | azicfg[5]));
-		if (configDriver < 0x1000 || configDriver > 0x1FFF)
-			setDriver(SND_DRIVER_NOSOUND);
-		if (azicfg[6] > 0) 	setBufferLevel(azicfg[6]);
-		if (azicfg[7] > 0) 	setBufferFPS(azicfg[7]);
-		if (azicfg[8] > 0) 	setBackendFPS(azicfg[8]);
-		setDisallowSleepXA2((azicfg[9] != 0x00) ? true : false);
-		setDisallowSleepDS8((azicfg[10] != 0x00) ? true : false);
-	}
-	if (SoundDriverFactory::DriverExists(configDriver) == false)
-	{
-		configDriver = SoundDriverFactory::DefaultDriver();
-	}
+	if (RomRunning)
+		config_load_rom();
+	if (snd != NULL && RomRunning)
+		snd->SetVolume(Configuration::configVolume);
+
+	return;
 }
+
+bool  Configuration::config_save()
+{
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { ini.Reset(); }
+
+	ini.SetLongValue(SECTION_GENERAL, KEY_SYNCAUDIO, getSyncAudio());
+	ini.SetLongValue(SECTION_GENERAL, KEY_FORCESYNC, getForceSync());
+	ini.SetLongValue(SECTION_GENERAL, KEY_AIEMULATION, getAIEmulation());
+	ini.SetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BUFFERLEVEL, getBufferLevel());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BUFFERFPS, getBufferFPS());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BACKENDFPS, getBackendFPS());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
+
+	rc = ini.SaveFile(CONFIGFILENAME);
+	if (rc < 0)
+		return FALSE;
+
+	assert(rc == SI_OK);
+
+	return TRUE;
+}
+
+bool Configuration::config_save_rom()
+{
+	char temp[40];
+	char CRC_Entry[128];
+
+	sprintf(CRC_Entry, "%08X-%08X-C:%02X", Header->crc1, Header->crc2, Header->countrycode);
+	for (int i = 0; i < 32; i++)
+		temp[i] = Header->name[i ^ 3];
+
+	temp[32] = 0;
+
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { ini.Reset(); }
+
+	ini.SetValue(CRC_Entry, KEY_INTNAME, temp);
+	ini.SetLongValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio());
+	ini.SetLongValue(CRC_Entry, KEY_FORCESYNC, getForceSync());
+	ini.SetLongValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation());
+	ini.SetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver());
+	ini.SetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel());
+	ini.SetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS());
+	ini.SetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
+
+	rc = ini.SaveFile(CONFIGFILENAME);
+	if (rc < 0)
+		return FALSE;
+
+	assert(rc == SI_OK);
+
+	return TRUE;
+}
+
 void Configuration::SaveSettings()
 {
-	FILE *file;
-	file = fopen(ConfigFile, "wb");
-	if (file != NULL)
-	{
-		fprintf(file, "%c", (unsigned char)getSyncAudio());
-		fprintf(file, "%c", (unsigned char)getForceSync());
-		fprintf(file, "%c", (unsigned char)getAIEmulation());
-		fprintf(file, "%c", (unsigned char)getVolume());
-		fprintf(file, "%c%c", (unsigned char)((getDriver() >> 8) & 0xFF), (unsigned char)(getDriver() & 0xFF));
-		fprintf(file, "%c", (unsigned char)getBufferLevel());
-		fprintf(file, "%c", (unsigned char)getBufferFPS());
-		fprintf(file, "%c", (unsigned char)getBackendFPS());
-		fprintf(file, "%c", (unsigned char)getDisallowSleepXA2());
-		fprintf(file, "%c", (unsigned char)getDisallowSleepDS8());
-		fclose(file);
-	}
+	if (RomRunning)
+		config_save_rom();
+	else 
+		config_save();
+	return;
 }
 
 /*
@@ -129,10 +204,8 @@ void Configuration::SaveSettings()
 */
 void Configuration::LoadDefaults()
 {
-#if defined(_WIN32)
-	EnumDeviceCount = 0;
-	EnumDriverCount = 0;
-#endif
+	//EnumDeviceCount = 0;
+	//EnumDriverCount = 0;
 	safe_strcpy(Configuration::configAudioLogFolder, 499, "D:\\");
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS) && !defined(_XBOX)
 	strcpy_s(Configuration::configAudioLogFolder, 500, "D:\\");
@@ -150,29 +223,28 @@ void Configuration::LoadDefaults()
 	}
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
-#if defined(_WIN32)
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
-#endif
-	setDriver(SoundDriverFactory::DefaultDriver());	
-	setAIEmulation(true);
-	setSyncAudio(true);
+	setSyncAudio(false);
 	setForceSync(false);
+	setAIEmulation(true);
 	setVolume(0);
-	setFrequency(44100);
-	setBitRate(16);
+	setDriver(SoundDriverFactory::DefaultDriver());
 	setBufferLevel(3);
 	setBufferFPS(45);
 	setBackendFPS(90);
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
-	setResTimer(false);
-	LoadSettings();
+	setFrequency(44100); // Not saved currently
+	setBitRate(16); // Not saved currently
+	setResTimer(false); // Not saved currently
+	//LoadSettings();
 }
 #ifdef _WIN32
-#pragma comment(lib, "comctl32.lib") // TODO: Move this to the project / propsheets
+#pragma comment(lib, "comctl32.lib")
 extern HINSTANCE hInstance;
 void Configuration::ConfigDialog(HWND hParent)
 {
+	LoadSettings();
 	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG), hParent, ConfigProc);
 	//return;
 	PROPSHEETHEADER psh;
@@ -220,7 +292,7 @@ void Configuration::AboutDialog(HWND hParent)
 #define ABOUTMESSAGE \
 	PLUGIN_VERSION\
 	"\nby Azimer\n"\
-	"\nHome: https://www.apollo64.com/\n"\
+	"\nHome: http://www.apollo64.com/\n"\
 	"Source: https://github.com/Azimer/AziAudio/\n"\
 	"\n"\
 	"MusyX code credited to Bobby Smiles and Mupen64Plus\n"
@@ -232,7 +304,7 @@ void Configuration::AboutDialog(HWND hParent)
 #if 0 /* Disable Device Enumeration */
 // TODO: I think this can safely be removed
 #ifdef _WIN32
-BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)
+bool CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)
 {
 	UNREFERENCED_PARAMETER(lpszDrvName);
 	UNREFERENCED_PARAMETER(lpContext);

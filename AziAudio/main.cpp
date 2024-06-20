@@ -28,29 +28,27 @@
 	#undef __in
 	#undef __out
 	#include <ios>
+    void RedirectIOToConsole();
 	#endif
-	using namespace std;
 #endif
 
 SoundDriverInterface *snd = NULL;
 
 bool ai_delayed_carry;  // Borrowed from MAME and Mupen64Plus
 bool bBackendChanged = false;
+bool first_time = true;
 
 void SetTimerResolution(void);
 
-#ifdef USE_PRINTF
-  void RedirectIOToConsole();
-#endif
-
 HINSTANCE hInstance;
+OSVERSIONINFOEX OSInfo;
 
 #ifdef __GNUC__
 extern "C"
 #endif
 
 #ifdef _WIN32
-BOOL WINAPI DllMain(
+bool WINAPI DllMain(
   HINSTANCE hinstDLL,  // handle to DLL module
   DWORD fdwReason,     // reason for calling function
   LPVOID lpvReserved   // reserved
@@ -109,7 +107,14 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 	RedirectIOToConsole();
 	DEBUG_OUTPUT("Logging to console enabled...\n");
 #endif
-	Dacrate = 0;
+#ifdef _WIN32
+    ZeroMemory(&OSInfo, sizeof(OSVERSIONINFOEX));
+    OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+    GetVersionEx((LPOSVERSIONINFO)&OSInfo);
+	DEBUG_OUTPUT("%04X %04X\n", _WIN32_WINNT, WINVER);
+	DEBUG_OUTPUT("Windows %li.%li  Build %li, Platform: %li\n", OSInfo.dwMajorVersion, OSInfo.dwMinorVersion, OSInfo.dwBuildNumber, OSInfo.dwPlatformId);
+#endif
+	//Dacrate = 0;
 	//CloseDLL ();
 
 	if (Configuration::getResTimer() == true)
@@ -122,7 +127,9 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 	DMEM = Audio_Info.DMEM;
 	IMEM = Audio_Info.IMEM;
 
+	Configuration::Header = (t_romheader*)Audio_Info.HEADER;
 	Configuration::LoadDefaults();
+	Configuration::LoadSettings();
 	snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
 
 	if (snd == NULL)
@@ -152,6 +159,12 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo) {
 }
 
 EXPORT void CALL ProcessAList(void) {
+	Configuration::RomRunning = true;
+	if (first_time)
+	{
+		first_time = false;
+		Configuration::LoadSettings();
+	}
 	if (snd == NULL)
 		return;
 	HLEStart ();
@@ -159,6 +172,12 @@ EXPORT void CALL ProcessAList(void) {
 
 EXPORT void CALL RomOpen(void) 
 {
+	Configuration::RomRunning = true;
+	//if (first_time)
+	{
+		first_time = false;
+		Configuration::LoadSettings();
+	}
 	DEBUG_OUTPUT("Call: RomOpen()\n");
 	if (snd == NULL)
 		return;
@@ -167,6 +186,8 @@ EXPORT void CALL RomOpen(void)
 
 EXPORT void CALL RomClosed(void) 
 {
+	Configuration::RomRunning = false;
+	Configuration::LoadSettings();
 	DEBUG_OUTPUT("Call: RomClosed()\n");
 	Dacrate = 0; // Forces a revisit to initialize audio
 	if (snd == NULL)
@@ -310,7 +331,8 @@ void RedirectIOToConsole() {
 	FreeConsole();
 	if (!AllocConsole())
 		return;
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	*stdout = *freopen("CONOUT$", "w", stdout);
+	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	//// set the screen buffer to be big enough to let us scroll text
 	//GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
 	//coninfo.dwSize.Y = MAX_CONSOLE_LINES;
@@ -335,7 +357,7 @@ void RedirectIOToConsole() {
 	//setvbuf(stderr, NULL, _IONBF, 0);
 	//// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog 
 	//// point to console as well
-	//ios::sync_with_stdio();
+	// std::ios::sync_with_stdio();
 	
 #endif
 }
@@ -352,7 +374,7 @@ void SetTimerResolution(void)
 	HMODULE hMod = GetModuleHandle("ntdll.dll");
 	if (hMod != NULL)
 	{
-		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN BOOLEAN SetResolution, OUT PULONG CurrentResolution);
+		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN Boolean SetResolution, OUT PULONG CurrentResolution);
 		tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hMod, "NtSetTimerResolution");
 		ULONG CurrentResolution = 0;
 		NtSetTimerResolution(10000, TRUE, &CurrentResolution);

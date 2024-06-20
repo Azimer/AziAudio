@@ -50,37 +50,41 @@ void NoSoundDriver::AiUpdate(Boolean Wait)
 	u32 tick, tickdiff;
 	Wait = Wait; // Avoids unreferences parameter warning.  Required as part of the Project64 API
 
-	// GetTickCount - Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
+	while (Wait)
+	{
+
+		// GetTickCount - Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
 #if defined(_WIN32) || defined(_XBOX)
-	if (lastTick == 0)
-		lastTick = GetTickCount(); 
+		if (lastTick == 0)
+			lastTick = GetTickCount();
 #endif	
 
-	if (isPlaying == true)
-	{
-#if defined(_WIN32) || defined(_XBOX)
-		Sleep(5);
-		tick = GetTickCount();
-		tickdiff = tick - lastTick;
-		lastTick = tick;
-#else
-		usleep(5);
-		tickdiff = 50;
-#endif	
-		if (tickdiff > 50)
+		if (isPlaying == true)
 		{
-			tickdiff = 50;
-		}
-		bytes = (m_SamplesPerSecond / 1000) * 4 * tickdiff; // Play tickdiff ms of audio
-		if (bytes > 0) LoadAiBuffer(NULL, bytes);
-	}
-	else
-	{
 #if defined(_WIN32) || defined(_XBOX)
-		Sleep(1);
+			Sleep(5);
+			tick = GetTickCount();
+			tickdiff = tick - lastTick;
+			lastTick = tick;
 #else
-		usleep(1);
+			usleep(5);
+			tickdiff = 50;
 #endif	
+			if (tickdiff > 50)
+			{
+				tickdiff = 50;
+			}
+			bytes = (m_SamplesPerSecond / 1000) * 4 * tickdiff; // Play tickdiff ms of audio
+			if (bytes > 0) LoadAiBuffer(NULL, bytes);
+		}
+		else
+		{
+#if defined(_WIN32) || defined(_XBOX)
+			Sleep(1);
+#else
+			usleep(1);
+#endif	
+		}
 	}
 }
 
