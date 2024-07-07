@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F4328CE2-172A-48A0-889E-696FFC559809}</ProjectGuid>
+    <RootNamespace>AziAudioTest</RootNamespace>
+    <ProjectName>AziAudioTest</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)PropertySheets\$(Platform).props" />
+    <Import Project="$(SolutionDir)PropertySheets\$(Configuration).props" />
+  </ImportGroup>
+  <PropertyGroup Label="Configuration">
+    <IntDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Target\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Party\directx\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(SolutionDir)3rd Party\directx\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">$(SolutionDir)3rd Party\directx\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="audiohle.h" />
+    <ClInclude Include="AudioSpec.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="Configuration.h" />
+    <ClInclude Include="DirectSoundDriver.h" />
+    <ClInclude Include="DirectSoundDriverLegacy.h" />
+    <ClInclude Include="Mupen64plusHLE\arithmetics.h" />
+    <ClInclude Include="Mupen64plusHLE\audio.h" />
+    <ClInclude Include="Mupen64plusHLE\common.h" />
+    <ClInclude Include="Mupen64plusHLE\hle.h" />
+    <ClInclude Include="Mupen64plusHLE\hle_external.h" />
+    <ClInclude Include="Mupen64plusHLE\hle_internal.h" />
+    <ClInclude Include="Mupen64plusHLE\memory.h" />
+    <ClInclude Include="Mupen64plusHLE\ucodes.h" />
+    <ClInclude Include="my_types.h" />
+    <ClInclude Include="NoSoundDriver.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="SoundDriver.h" />
+    <ClInclude Include="SoundDriverFactory.h" />
+    <ClInclude Include="SoundDriverInterface.h" />
+    <ClInclude Include="SoundDriverLegacy.h" />
+    <ClInclude Include="tests\testmain.h" />
+    <ClInclude Include="tests\tests.h" />
+    <ClInclude Include="WASAPISoundDriver.h" />
+    <ClInclude Include="WaveOut.h" />
+    <ClInclude Include="WaveOutSoundDriver.h" />
+    <ClInclude Include="XAudio2SoundDriver.h" />
+    <ClInclude Include="XAudio2SoundDriverLegacy.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ABI1.cpp" />
+    <ClCompile Include="ABI2.cpp" />
+    <ClCompile Include="ABI3.cpp" />
+    <ClCompile Include="ABI3mp3.cpp" />
+    <ClCompile Include="ABI_Adpcm.cpp" />
+    <ClCompile Include="ABI_Buffers.cpp" />
+    <ClCompile Include="ABI_Envmixer.cpp" />
+    <ClCompile Include="ABI_Filters.cpp" />
+    <ClCompile Include="ABI_MixerInterleave.cpp" />
+    <ClCompile Include="ABI_Resample.cpp" />
+    <ClCompile Include="Configuration.cpp" />
+    <ClCompile Include="DirectSoundDriver.cpp" />
+    <ClCompile Include="DirectSoundDriverLegacy.cpp" />
+    <ClCompile Include="HLEMain.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mupen64plusHLE\audio.c" />
+    <ClCompile Include="Mupen64plusHLE\memory.c" />
+    <ClCompile Include="Mupen64plusHLE\Mupen64Support.c" />
+    <ClCompile Include="Mupen64plusHLE\musyx.c" />
+    <ClCompile Include="NoSoundDriver.cpp" />
+    <ClCompile Include="SoundDriver.cpp" />
+    <ClCompile Include="SoundDriverFactory.cpp" />
+    <ClCompile Include="SoundDriverInterface.cpp" />
+    <ClCompile Include="SoundDriverLegacy.cpp" />
+    <ClCompile Include="tests\configtests.cpp" />
+    <ClCompile Include="tests\deviceselector.cpp" />
+    <ClCompile Include="tests\testmain.cpp" />
+    <ClCompile Include="WASAPISoundDriver.cpp" />
+    <ClCompile Include="WaveOut.cpp" />
+    <ClCompile Include="WaveOutSoundDriver.cpp" />
+    <ClCompile Include="XAudio2SoundDriver.cpp" />
+    <ClCompile Include="XAudio2SoundDriverLegacy.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="resource.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <ItemGroup>
+    <FilesToDeploy Include="$(OutDir)AziAudio.exe" />
+  </ItemGroup>
+  <!--Set Pj64Install as an environment variable or as an MSBuild command-line property.-->
+  <Target Name="Publish">
+    <Message Text="Deploying to [$(Pj64Install)]" />
+    <Message Text="Files to move: [@(FilesToDeploy)]" />
+    <Copy SourceFiles="@(FilesToDeploy)" DestinationFolder="$(Pj64Install)\Plugin\$(PluginType)" Condition="'$(Platform)'=='Win32'" />
+    <Copy SourceFiles="@(FilesToDeploy)" DestinationFolder="$(Pj64Install)\Plugin64\$(PluginType)" Condition="'$(Platform)'=='x64'" />
+  </Target>
+</Project>
