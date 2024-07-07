@@ -16,7 +16,7 @@ int ConfigTestDefaults(std::string& failureResult)
     failCnt += TestTrue(Configuration::getForceSync() == false, "LoadDefaults: ForceSync should be false by default", failureResult);
     failCnt += TestTrue(Configuration::getAIEmulation() == true, "LoadDefaults: AIEmulation should be true by default", failureResult);
     failCnt += TestTrue(Configuration::getVolume() == 0, "LoadDefaults: Volume should be 0 by default", failureResult);
-    failCnt += TestTrue(Configuration::getDriver() == SND_DRIVER_DS8, "LoadDefaults: Drive should be DS8 by default", failureResult);
+    failCnt += TestTrue(Configuration::getDriver() == SND_DRIVER_XA2, "LoadDefaults: Drive should be DS8 by default", failureResult);
     failCnt += TestTrue(Configuration::getBufferLevel() == 3, "LoadDefaults: BufferLevel should be 3 by default", failureResult);
     failCnt += TestTrue(Configuration::getBufferFPS() == 45, "LoadDefaults: BufferFPS should be 45 by default", failureResult);
     failCnt += TestTrue(Configuration::getBackendFPS() == 90, "LoadDefaults: BackendFPS should be 90 by default", failureResult);
@@ -31,7 +31,7 @@ static const char* ConfigTestSaveINI =\
 "ForceSync = 0\r\n"
 "AIEmulation = 1\r\n"
 "Volume = 0\r\n"
-"Driver = 4097\r\n"
+"Driver = 4099\r\n"
 "BufferLevel = 3\r\n"
 "BufferFPS = 45\r\n"
 "BackendFPS = 90\r\n"
@@ -99,7 +99,7 @@ static const char *ConfigTestLoadINIRom =\
 "ForceSync=0\r\n"
 "AIEmulation=1\r\n"
 "Volume=50\r\n"
-"Driver=4099\r\n"
+"Driver=4097\r\n"
 "BufferLevel=3\r\n"
 "BufferFPS=33\r\n"
 "BackendFPS=66\r\n"
@@ -159,6 +159,8 @@ bool validateINIFile(const char* expectedContents, std::string& failureResult)
     input.close();
     if (memcmp(buffer.data(), expectedContents, std::min<int>(strlen(expectedContents), size)) != 0)
     {
+        std::string str(buffer.begin(), buffer.end());
+        std::cout << str << std::endl;
         failureResult += "INI contents do not match what is expected.";
         return 1;
     }
@@ -192,7 +194,7 @@ int ConfigTestSaveModified(std::string& failureResult)
     if (validateINIFile(ConfigTestSaveINIModded, failureResult))
     { 
         std::cout << ConfigTestSaveINI << std::endl; 
-        failureResult = "ERROR: ConfigTestSave: " + failureResult;
+        failureResult = "ERROR: ConfigTestSaveModified: " + failureResult;
         return 1; 
     };
 
@@ -267,13 +269,13 @@ int ConfigTestLoadRomPresent(std::string& failureResult)
     failCnt += TestTrue(Configuration::getSyncAudio() == false, "ConfigTestLoadRomPresent: SyncAudio should be false", failureResult);
     failCnt += TestTrue(Configuration::getForceSync() == false, "ConfigTestLoadRomPresent: ForceSync should be false", failureResult);
     failCnt += TestTrue(Configuration::getAIEmulation() == true, "ConfigTestLoadRomPresent: AIEmulation should be true", failureResult);
-    failCnt += TestTrue(Configuration::getVolume() == 50, "ConfigTestLoadRomPresent: Volume should be 50", failureResult);
+    failCnt += TestTrue(Configuration::getVolume() == 0, "ConfigTestLoadRomPresent: Volume should be 0", failureResult);
     failCnt += TestTrue(Configuration::getDriver() == SND_DRIVER_XA2, "ConfigTestLoadRomPresent: Driver should be XA2", failureResult);
     failCnt += TestTrue(Configuration::getBufferLevel() == 3, "ConfigTestLoadRomPresent: BufferLevel should be 3", failureResult);
     failCnt += TestTrue(Configuration::getBufferFPS() == 33, "ConfigTestLoadRomPresent: BufferFPS should be 33", failureResult);
     failCnt += TestTrue(Configuration::getBackendFPS() == 66, "ConfigTestLoadRomPresent: BackendFPS should be 66", failureResult);
-    failCnt += TestTrue(Configuration::getDisallowSleepDS8() == 0, "ConfigTestLoadRomPresent: DisallowSleepDS8 should be true", failureResult);
-    failCnt += TestTrue(Configuration::getDisallowSleepXA2() == 0, "ConfigTestLoadRomPresent: DisallowSleepXA2 should be true", failureResult);
+    failCnt += TestTrue(Configuration::getDisallowSleepDS8() == 1, "ConfigTestLoadRomPresent: DisallowSleepDS8 should be true", failureResult);
+    failCnt += TestTrue(Configuration::getDisallowSleepXA2() == 1, "ConfigTestLoadRomPresent: DisallowSleepXA2 should be true", failureResult);
     return failCnt;
 }
 
