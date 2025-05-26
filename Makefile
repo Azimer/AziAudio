@@ -34,14 +34,29 @@ BASICOPTS = -g -D_DEBUG
 BUILD_TYPE = Debug
 endif
 
+# Establish MinGW port prefix for Microsoft Windows 2000, XP, Vista, 7, 10 and still running...
+ifeq ($(OS),Windows_NT)
 BUILD_PREFIX = i686-w64-mingw32-
+endif
+
 CC = $(BUILD_PREFIX)gcc
 CXX = $(BUILD_PREFIX)g++
 WINDRES = $(BUILD_PREFIX)windres
+
 COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wall -Wno-attributes -Wno-unknown-pragmas # -D_WIN32_WINNT=0x0501 -DWINVER=0x0501
+ifeq ($(BUILD_ARCH),x86_64)
+ifneq ($(OS),Windows_NT)
+COMMON_FLAGS := -fPIC # position-independent code needed for 64-bit POSIX executables but not Windows builds
+endif
+endif
+
 CFLAGS = $(BASICOPTS) $(COMMON_FLAGS)
 CXXFLAGS = $(BASICOPTS) $(COMMON_FLAGS) $(CPPFLAGS)
+ifeq ($(OS),Windows_NT)
 LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound -lksuser
+else
+LDFLAGS = -static-libstdc++ -static-libgcc -static # -lSDL[2]? -lopenal? -lpipewire?
+endif
 
 # Define the target directories.
 BINDIR=bin
